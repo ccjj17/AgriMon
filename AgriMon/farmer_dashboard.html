@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMon | Farm 1</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --header-bg: #d5edc9;
+            --main-bg: #7ba86d;
+            --panel-bg: #eafaf1;
+            --text-dark: #2c3e50;
+            --indicator-bg: #d5edc9;
+            --danger-bg: #ff9999;
+        }
+
+        body {
+            font-family: 'Georgia', serif;
+            background-color: var(--main-bg);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 */
+        .header {
+            background-color: var(--header-bg);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { width: 45px; height: 45px; cursor: pointer; }
+        /* 或者直接针对 nav-links */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; /* 使用绝对定位强制居中 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; font-size: 18px; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; background: #eee; border-radius: 50%; border: 2px solid white; }
+
+        /* --- 核心修复：对齐容器 --- */
+        .main-content {
+            display: flex;
+            flex: 1;
+            justify-content: center; /* 居中 */
+            align-items: flex-start; /* 关键：确保左右两列顶部对齐 */
+            padding: 60px 40px;           /* 页面四周留白 */
+            gap: 40px;               /* 左右两列间距 */
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* 左侧部分 */
+        .farm-section {
+            flex: 0 0 auto; 
+        }
+
+        /* 修复标题边距，确保与右侧面板顶端对齐 */
+        .farm-title {
+            color: white;
+            font-size: 42px;
+            margin: 0 0 20px 0; /* 移除顶部 margin，只保留底部间距 */
+            font-weight: bold;
+            line-height: 1;    /* 防止行高撑开空间 */
+        }
+
+        .grid-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 140px);
+            grid-template-rows: repeat(3, 140px);
+            gap: 15px;
+        }
+
+        .plot-cell {
+            background-color: #8b5a2b;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .plot-cell:hover { transform: scale(1.03); }
+        .plot-cell img { width: 70%; height: auto; }
+
+        /* 右侧详情面板 */
+        .right-panel {
+            flex: 0 0 380px;
+            background-color: var(--panel-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            /* 确保面板本身没有多余 margin */
+            margin-top: 0; 
+            margin: 0;
+        }
+
+        /* 修复右侧标题边距 */
+        .crop-header { 
+            display: flex; 
+            align-items: center; 
+            gap: 15px; 
+            margin-bottom: 15px; 
+            margin-top: 0; 
+        }
+        .crop-header img { width: 50px; }
+        .crop-header h2 { font-size: 32px; margin: 0; line-height: 1; }
+        .crop-desc { font-size: 15px; line-height: 1.4; color: #333; margin-bottom: 25px; }
+
+        .indicators-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .indicator {
+            background-color: var(--indicator-bg);
+            padding: 12px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+        .indicator.danger { background-color: var(--danger-bg); }
+
+        .footer-note {
+            position: fixed;
+            bottom: 20px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 14px;
+        }
+        .soil-sample { width: 25px; height: 25px; background: #8b5a2b; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html">Farm List <i class="fas fa-chevron-down"></i></a>
+                <a href="farmer_monitor.html">Monitoring Page</a>
+                <a href="farmer_manage.html">Task List <i class="fas fa-chevron-down"></i></a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+                <strong id="navName">Username</strong><br>
+                <small id="navID" style="font-size: 10px;">ID: FM-001</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar">
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="farm-section">
+            <h1 class="farm-title">Farm 1</h1>
+            <div class="grid-3x3">
+                <script>
+                    for(let i=0; i<9; i++) {
+                        document.write(`
+                            <div class="plot-cell" onclick="location.href='farmer_monitor.html'">
+                                <img src="https://cdn-icons-png.flaticon.com/512/1134/1134441.png" alt="corn">
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+    
+        <div class="right-panel">
+            <div class="crop-header">
+                <img src="https://cdn-icons-png.flaticon.com/512/1134/1134441.png" alt="corn">
+                <h2 id="cropTitle">Corn</h2>
+                <i class="fas fa-info-circle" style="margin-left: auto; color: #999;"></i>
+            </div>
+            <p class="crop-desc">
+                Corn is a highly adaptable crop that grows well in warm and sunny conditions. It requires fertile soil and steady water supply, grows quickly.
+            </p>
+
+            <div class="indicators-grid">
+                <div class="indicator"><i class="far fa-clock"></i> Growth: ~80d</div>
+                <div class="indicator"><i class="fas fa-sun"></i> Sunlight: 4h</div>
+                <div class="indicator"><i class="fas fa-thermometer-half"></i> Temp: 28°C</div>
+                <div class="indicator"><i class="fas fa-wind"></i> Wind: 4km/h</div>
+                <div class="indicator"><i class="fas fa-tint"></i> Moisture: 58%</div>
+                <div class="indicator"><i class="fas fa-plus"></i> Condition: Healthy</div>
+                <div class="indicator danger"><i class="fas fa-bug"></i> Pest: ~6%</div>
+                <div class="indicator danger"><i class="fas fa-biohazard"></i> Weed: 16%</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <div class="soil-sample"></div> = one acre of land
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedName = localStorage.getItem('user_name') || "Username";
+            document.getElementById('navName').innerText = storedName;
+
+            const currentFarm = localStorage.getItem('current_farm') || "Farm 1";
+            const titleElement = document.querySelector('.farm-title'); 
+            if (titleElement) titleElement.innerText = currentFarm;
+
+            const savedImg = localStorage.getItem('selected_crop_img');
+            const savedName = localStorage.getItem('selected_crop_name');
+
+            if (savedImg) {
+                const allPlots = document.querySelectorAll('.plot-cell img');
+                allPlots.forEach(img => img.src = savedImg);
+                const mainImg = document.querySelector('.crop-header img');
+                if (mainImg) mainImg.src = savedImg;
+            }
+            if (savedName) {
+                const title = document.getElementById('cropTitle');
+                if (title) title.innerText = savedName;
+            }
+        });
+    </script>
+</body>
+</html>

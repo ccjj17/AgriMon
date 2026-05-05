@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --header-bg: #d5edc9; --main-bg: #7ba86d; --text-dark: #2c3e50; }
+        body { font-family: 'Georgia', serif; background-color: var(--main-bg); margin: 0; }
+
+        /* 导航栏保持一致 */
+        .header { background: var(--header-bg); padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.1); }
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { width: 45px; cursor: pointer; }
+        /* 或者直接针对 nav-links */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; /* 使用绝对定位强制居中 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; margin-right: 20px; }
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
+
+        .container { display: flex; padding: 60px; gap: 60px; justify-content: center; align-items: center; }
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 180px); gap: 15px; }
+        .plot { background: #8b5a2b; aspect-ratio: 1; border-radius: 15px; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .plot img { width: 70%; }
+
+        /* 只有加号在右侧 */
+        .add-btn { font-size: 80px; color: #3498db; cursor: pointer; transition: 0.3s; }
+        .add-btn:hover { transform: scale(1.1) rotate(90deg); color: #2980b9; }
+
+        /* 文字容器：实现姓名和 ID 上下排列 */
+        .nav-user-text {
+            display: flex;
+            flex-direction: column; /* 纵向排列 */
+                    text-align: right;      /* 文字右对齐 */
+            margin-right: 12px;     /* 与头像保持一点距离 */
+            line-height: 1.2;       /* 让名字和ID靠得更近 */
+        }
+
+        #navName {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        #navID {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* 确保头像大小统一 */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html">Farm List</a>
+                <a href="farmer_dashboard.html" style="color: #27ae60;">Monitoring Page</a>
+                <a href="farmer_manage.html">Task List</a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div class="nav-user-text">
+                <strong id="navName">Username</strong>
+                <small id="navID">ID: FM-001</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar" alt="User">
+        </div>
+    </header>
+
+    <div class="container">
+        <div>
+            <h1 style="color:white; margin-bottom:20px;">Farm 1</h1>
+            <div class="grid-3x3" id="monitorGrid"></div>
+        </div>
+        <i class="fas fa-plus-circle add-btn" onclick="location.href='farmer_monitor_edit.html'"></i>
+    </div>
+
+    <script>
+        const cropIcon = localStorage.getItem('selected_crop_icon') || "🌽";
+        const grid = document.getElementById('monitorGrid');
+        for(let i=0; i<9; i++) grid.innerHTML += `<div class="plot">${cropIcon}</div>`;
+
+    window.onload = function() {
+        const savedName = localStorage.getItem('selected_crop_name');
+        const savedImg = localStorage.getItem('selected_crop_img');
+
+        if (savedName && savedImg) {
+            // 1. 更新标题 (Farm 1 下面的文字，如果有的话)
+            if (document.getElementById('displayFarmName')) {
+                document.getElementById('displayFarmName').innerText = savedName;
+            }
+
+            // 2. 更新九宫格里的所有图片
+            const grid = document.getElementById('monitorGrid');
+            if (grid) {
+                grid.innerHTML = ''; // 清空旧的
+                for (let i = 0; i < 9; i++) {
+                    grid.innerHTML += `<div class="plot"><img src="${savedImg}" style="width:70%;"></div>`;
+                }
+            }
+        }
+    };
+    </script>
+</body>
+</html>

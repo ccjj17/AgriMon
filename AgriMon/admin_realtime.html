@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data - AgriMon</title>
+    <style>
+        :root {
+            --bg-color: #76948a;      
+            --card-bg: #2d5450;       
+            --nav-bg: #cbdad5;        
+            --text-dark: #2d5450;
+            --text-white: #ffffff;
+            --highlight-yellow: #ffd700;
+            --value-green: #4ade80;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            font-family: 'Georgia', serif;
+            overflow-x: auto; /* 宽度不够时横向滚动 */
+            overflow-y: auto; /* 高度不够时纵向滚动 */
+            min-height: 100vh;
+        }
+
+        /* --- 页面整体容器：防止导航栏和卡片挤歪 --- */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            /* 修正点 2：使用 min-height 而不是固定 height，防止内容溢出被截断 */
+            min-height: 100vh; 
+            min-width: 1000px; /* 保护导航栏和卡片同进退 */
+            overflow-x: auto;
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; /* 消除图片下方的微小间隙 */
+        }   
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-right { display: flex; align-items: center; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+
+        /* --- 内容区域布局 --- */
+        .content-wrapper {
+            flex: 1;
+            width: 100%;
+            /* 修正点 3：增加底部 padding (100px)，确保底部内容显示完全且有呼吸感 */
+            padding: 60px 80px 100px 80px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            align-items: flex-start;
+        }
+
+        .realtime-container {
+            width: 100%;
+            max-width: 1200px;
+            min-width: 800px;
+            background-color: var(--card-bg);
+            border-radius: 60px;
+            padding: 60px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            height: min-content;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+        }
+
+        .header-left h2 { font-size: 2.5rem; color: white; font-weight: normal; }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--highlight-yellow) !important; /* 使用 !important 确保覆盖默认白色 */
+            /* 关键修改：取消半透明效果，让它看起来很鲜艳 */
+            opacity: 1 !important;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            font-family: sans-serif;
+            font-weight: bold; /* 可选：让文字加粗，更显眼 */
+            flex-shrink: 0;
+        }
+
+        /* --- 数据卡片网格 --- */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* 三列布局 */
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .data-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 40px;
+            padding: 50px 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s;
+        }
+        .data-item:hover { transform: translateY(-5px); background: rgba(255, 255, 255, 0.08); }
+
+        .data-label {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .data-value {
+            color: var(--value-green);
+            font-size: 3.5rem;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+
+        .data-unit {
+            font-size: 1.2rem;
+            margin-left: 5px;
+            opacity: 0.8;
+        }
+
+        /* 状态指示器 */
+        .status-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background-color: var(--value-green);
+            border-radius: 50%;
+            margin-right: 15px;
+            box-shadow: 0 0 10px var(--value-green);
+        }
+
+    </style>
+</head>
+<body>
+
+<nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_about.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+            </div>
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+        <div class="content-wrapper">
+            <main class="realtime-container">
+                <div class="header-area">
+                    <div class="header-left">
+                        <h2><span class="status-dot"></span><span id="regionTitle">Johor</span> Real-Time Data</h2>
+                    </div>
+                    <a href="admin_regions_detail.html" id="backLink" class="back-btn">← Back to Details</a>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-item">
+                        <span class="data-label">Temperature</span>
+                        <div class="data-value">28.5<span class="data-unit">°C</span></div>
+                    </div>
+
+                    <div class="data-item">
+                        <span class="data-label">Soil Moisture</span>
+                        <div class="data-value">42<span class="data-unit">%</span></div>
+                    </div>
+
+                    <div class="data-item">
+                        <span class="data-label">PH Value</span>
+                        <div class="data-value">6.8<span class="data-unit">pH</span></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        function initRealtime() {
+            const params = new URLSearchParams(window.location.search);
+            const reg = params.get('reg') || 'Johor';
+
+            // 动态修改标题和返回按钮
+            document.getElementById('regionTitle').innerText = reg;
+            document.getElementById('backLink').href = `admin_regions_detail.html?reg=${reg}`;
+
+            // 这里以后可以添加真实的 API 调用来更新 data-value
+        }
+
+        window.onload = initRealtime;
+    </script>
+</body>
+</html>

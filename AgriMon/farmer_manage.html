@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMon | Task List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --header-bg: #d5edc9;
+            --main-bg: #7ba86d;
+            --panel-bg: #eafaf1;
+            --text-dark: #2c3e50;
+            --indicator-bg: #d5edc9;
+            --danger-bg: #ff9999;
+        }
+
+        body {
+            font-family: 'Georgia', serif; /* 统一字体 */
+            background-color: var(--main-bg);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* 导航栏 - 与 Dashboard 完全一致 */
+        .header {
+            background-color: var(--header-bg);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { width: 45px; height: 45px; cursor: pointer; }
+        /* 或者直接针对 nav-links */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; /* 使用绝对定位强制居中 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; font-size: 18px; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; background: #eee; border-radius: 50%; border: 2px solid white; }
+
+        /* 主体布局 - 保持 1300px 居中并对齐顶部 */
+        .main-content {
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 40px;
+            gap: 40px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* 左侧农场显示 */
+        .farm-section { flex: 0 0 auto; }
+        .farm-title {
+            color: white;
+            font-size: 42px;
+            margin: 0 0 20px 0;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .grid-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 140px);
+            grid-template-rows: repeat(3, 140px);
+            gap: 15px;
+        }
+
+        .plot-cell {
+            background-color: #8b5a2b;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        .plot-cell img { width: 70%; height: auto; }
+
+        /* 右侧任务面板 - 匹配 Dashboard 的面板样式 */
+        .right-panel {
+            flex: 0 0 450px; /* 任务列表稍宽一点以便容纳文字 */
+            background-color: var(--panel-bg);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            text-align: center;
+            border-bottom: 2px solid var(--text-dark);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+        }
+        .task-header h2 { font-size: 28px; margin: 0; color: var(--text-dark); text-transform: uppercase; }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+        }
+
+        .task-item {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #333;
+            padding-left: 20px;
+            position: relative;
+        }
+        .task-item::before {
+            content: "-";
+            position: absolute;
+            left: 0;
+        }
+
+        .alert-text { color: #e74c3c; font-weight: bold; }
+
+        .back-link {
+            display: block;
+            margin-top: 40px;
+            color: var(--text-dark);
+            text-decoration: underline;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .footer-note {
+            position: fixed;
+            bottom: 20px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 14px;
+        }
+        .soil-sample { width: 25px; height: 25px; background: #8b5a2b; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html">Farm List <i class="fas fa-chevron-down"></i></a>
+                <a href="farmer_monitor.html">Monitoring Page</a>
+                <a href="farmer_dashboard.html" style="color: #27ae60;">Task List <i class="fas fa-chevron-up"></i></a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+                <strong id="navName">Username</strong><br>
+                <small id="navID" style="font-size: 10px;">ID: FM-001</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar">
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="farm-section">
+            <h1 class="farm-title" id="farmDisplay">Farm 1</h1>
+            <div class="grid-3x3" id="plotGrid">
+                </div>
+        </div>
+    
+        <div class="right-panel">
+            <div class="task-header">
+                <h2>Daily Tasks</h2>
+            </div>
+            <ul class="task-list">
+                <li class="task-item">Water <span class="farmNameLabel">Farm 1</span>: Current 46.0%. Apply 12.0L to reach 70.0%.</li>
+                <li class="task-item">Pest Control: <span class="alert-text">Detected at 10.0% (Alert!)</span> near Plot [2, 0].</li>
+                <li class="task-item">General Inspection: Check growth status for all <span id="cropNameLabel">Corn</span> plots.</li>
+            </ul>
+
+            <div class="task-header">
+                <h2>Weekly Tasks</h2>
+            </div>
+            <ul class="task-list">
+                <li class="task-item">System Maintenance: Calibrate sensors for <span class="farmNameLabel">Farm 1</span></li>
+                <li class="task-item">Fertilizer Application: Schedule for coming Sunday</li>
+            </ul>
+            
+            <div class="back-link" onclick="location.href='farmer_dashboard.html'">
+                Back to Farm Details
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <div class="soil-sample"></div> = one acre of land
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 同步用户信息
+            const storedName = localStorage.getItem('user_name') || "Username";
+            document.getElementById('navName').innerText = storedName;
+
+            // 2. 同步农场名称
+            const currentFarm = localStorage.getItem('current_farm') || "Farm 1";
+            document.getElementById('farmDisplay').innerText = currentFarm;
+            document.querySelectorAll('.farmNameLabel').forEach(el => el.innerText = currentFarm);
+
+            // 3. 同步作物信息
+            const savedImg = localStorage.getItem('selected_crop_img') || "https://cdn-icons-png.flaticon.com/512/1134/1134441.png";
+            const savedName = localStorage.getItem('selected_crop_name') || "Corn";
+            
+            document.getElementById('cropNameLabel').innerText = savedName;
+
+            // 4. 生成网格
+            const grid = document.getElementById('plotGrid');
+            for(let i=0; i<9; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'plot-cell';
+                const img = document.createElement('img');
+                img.src = savedImg;
+                cell.appendChild(img);
+                grid.appendChild(cell);
+            }
+        });
+    </script>
+</body>
+</html>

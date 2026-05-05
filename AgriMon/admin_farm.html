@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Management - AgriMon Admin</title>
+    <style>
+        /* 核心配色方案 */
+        :root {
+            --bg-color: #76948a;      /* 页面背景 */
+            --card-bg: #2d5450;       /* 卡片背景 */
+            --nav-bg: #cbdad5;        /* 导航栏背景 */
+            --text-white: #ffffff;
+            --text-dark: #2d5450;
+            --accent-yellow: #ffd700;
+            --status-online: #a0ff9a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; /* 消除图片下方的微小间隙 */
+        }   
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-right { display: flex; align-items: center; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+
+        .profile-icon { width: 35px; height: 35px; background: #a0b3ad; border-radius: 50%; cursor: pointer; }
+
+        /* 主体布局 */
+        .main-container {
+            padding: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 农场列表卡片 */
+        .farm-card {
+            background-color: var(--card-bg);
+            border-radius: 60px; /* 还原图七超大圆角 */
+            padding: 50px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            min-height: 600px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .header-left .icon { font-size: 2.5rem; }
+        .header-left h2 { font-family: 'Georgia', serif; font-size: 2.2rem; font-weight: normal; }
+
+        /* 诊断按钮 (对应图六 Choice: 1) */
+        .diag-btn {
+            background-color: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.3s;
+        }
+        .diag-btn:hover { background-color: var(--accent-yellow); color: var(--text-dark); }
+
+        /* 表格样式 (填充图六数据) */
+        .farm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        .farm-table th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            opacity: 0.6;
+            font-weight: normal;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .farm-table td {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 1.05rem;
+        }
+
+        .status-tag {
+            color: var(--status-online);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 实时诊断面板 (对应图六底部) */
+        .diag-panel {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 25px;
+            font-family: 'Courier New', Courier, monospace;
+            border-left: 4px solid var(--accent-yellow);
+        }
+
+        .diag-title { color: var(--accent-yellow); margin-bottom: 15px; display: block; font-weight: bold; }
+        .diag-item { display: flex; justify-content: space-between; margin-bottom: 8px; opacity: 0.9; font-size: 0.95rem; }
+        .health-bar { color: #87ceeb; } /* 天蓝色表示健康度 */
+
+        .footer-msg { margin-top: 20px; display: block; opacity: 0.5; font-size: 0.85rem; text-align: center; }
+
+    </style>
+</head>
+<body>
+
+<nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_about.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_dashboard.html" class="nav-link active">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+            </div>
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <main class="main-container">
+
+        <section class="farm-card">
+            <div class="card-header">
+                <div class="header-left">
+                    <span class="icon">🏢</span>
+                    <h2>Farm List</h2>
+                </div>
+                <button class="diag-btn" onclick="alert('Running Global System Diagnostic...')">Run System Diagnostic</button>
+            </div>
+
+            <table class="farm-table">
+                <thead>
+                    <tr>
+                        <th>Owner</th>
+                        <th>Farm ID</th>
+                        <th>Location</th>
+                        <th>Main Crop</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>wfevj</td>
+                        <td>001</td>
+                        <td>Farm 1</td>
+                        <td>Corn</td>
+                        <td><span class="status-tag">● ONLINE</span></td>
+                    </tr>
+                    <tr>
+                        <td>wfevj</td>
+                        <td>002</td>
+                        <td>Farm 2</td>
+                        <td>Chili</td>
+                        <td><span class="status-tag">● ONLINE</span></td>
+                    </tr>
+                    </tbody>
+            </table>
+
+            <div class="diag-panel">
+                <span class="diag-title">?? AGRIMON REAL-TIME SYSTEM DIAGNOSTIC</span>
+                <div class="diag-item">
+                    <span>- Node: Farm 1</span>
+                    <span class="health-bar">| Health: 81.7% | ? STABLE</span>
+                </div>
+                <div class="diag-item">
+                    <span>- Node: Farm 2</span>
+                    <span class="health-bar">| Health: 80.2% | ? STABLE</span>
+                </div>
+                <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 10px; font-size: 0.8rem; opacity: 0.7;">
+                    ? Global scan completed. Minor fluctuations detected in Node 1 & 2.
+                </div>
+            </div>
+
+            <span class="footer-msg">Pulling encrypted data from Global Farm Management Center...</span>
+        </section>
+
+    </main>
+
+</body>
+</html>

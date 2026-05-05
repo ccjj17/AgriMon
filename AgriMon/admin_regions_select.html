@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring & Data - AgriMon</title>
+    <style>
+        :root {
+            --bg-color: #76948a;      
+            --nav-bg: #cbdad5;        
+            --map-inner-bg: #e0ece4;  
+            --text-dark: #2d5450;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); font-family: 'Georgia', serif; overflow: hidden; }
+
+        /* 导航栏保持不变 */
+        .admin-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--nav-bg); padding: 0 30px; height: 75px;
+        }
+        .nav-logo-img { width: 35px; height: 35px; }
+        .nav-link { text-decoration: none; color: var(--text-dark); font-weight: 600; margin: 0 20px; }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); }
+        .nav-user-img { width: 45px; height: 45px; border-radius: 50%; }
+
+        /* 主布局调整 */
+        .dashboard-container {
+            display: flex;
+            height: calc(100vh - 75px);
+            width: 100%;
+        }
+
+        /* 增加地图区的 flex 权重 (从 1 改为 4)，让它占更宽的空间 */
+        .map-wrapper {
+            flex: 4; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            padding: 10px; /* 减少外边距 */
+        }
+
+        .map-frame {
+            width: 98%; 
+            height: 95%; /* 增加高度占比 */
+            background-color: var(--map-inner-bg);
+            border-radius: 50px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* 关键修改：让图片容器占满整个白色背景框 */
+        .map-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 40px; /* 仅保留左右少量空隙 */
+            gap: 20px;
+        }
+
+        /* 强制图片放大 */
+        .map-part {
+            height: auto;
+            max-height: 85%; /* 限制最大高度，防止图片变形 */
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.15));
+        }
+
+        /* 重新分配东西马图片的宽度占比，让它们填满空间 */
+        .west-map { width: 40%; } 
+        .east-map { width: 60%; }
+
+        /* 右侧列表区保持固定宽度 */
+        .list-wrapper {
+            width: 320px; 
+            background-color: var(--nav-bg);
+            overflow-y: auto;
+            border-left: 2px solid rgba(45, 84, 80, 0.2);
+        }
+
+        .region-row {
+            display: block; width: 100%; padding: 22px 0;
+            text-decoration: none; color: var(--text-dark);
+            font-size: 1.3rem; text-align: center;
+            border-bottom: 1px solid rgba(45, 84, 80, 0.1);
+        }
+
+        .region-row:hover { background-color: rgba(45, 84, 80, 0.1); font-weight: bold; }
+        .list-wrapper::-webkit-scrollbar { width: 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="nav-left"><img src="assets/images/logo_agrimon.jpeg" class="nav-logo-img" onclick="location.href='admin_about.html'"></div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_dashboard.html" class="nav-link active">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="map-wrapper">
+            <div class="map-frame">
+                <div class="map-image-container">
+                    <img src="assets/images/west.png" alt="West Malaysia" class="map-part west-map">
+                    <img src="assets/images/east.png" alt="East Malaysia" class="map-part east-map">
+                </div>
+            </div>
+        </div>
+
+        <div class="list-wrapper">
+            <a href="admin_regions_detail.html?reg=Johor" class="region-row">Johor</a>
+            <a href="admin_regions_detail.html?reg=Kedah" class="region-row">Kedah</a>
+            <a href="admin_regions_detail.html?reg=Kelantan" class="region-row">Kelantan</a>
+            <a href="admin_regions_detail.html?reg=Melaka" class="region-row">Melaka</a>
+            <a href="admin_regions_detail.html?reg=Negeri Sembilan" class="region-row">Negeri Sembilan</a>
+            <a href="admin_regions_detail.html?reg=Pahang" class="region-row">Pahang</a>
+            <a href="admin_regions_detail.html?reg=Penang" class="region-row">Penang</a>
+            <a href="admin_regions_detail.html?reg=Perak" class="region-row">Perak</a>
+            <a href="admin_regions_detail.html?reg=Perlis" class="region-row">Perlis</a>
+            <a href="admin_regions_detail.html?reg=Sabah" class="region-row">Sabah</a>
+            <a href="admin_regions_detail.html?reg=Sarawak" class="region-row">Sarawak</a>
+            <a href="admin_regions_detail.html?reg=Selangor" class="region-row">Selangor</a>
+            <a href="admin_regions_detail.html?reg=Terengganu" class="region-row">Terengganu</a>
+        </div>
+    </div>
+
+</body>
+</html>

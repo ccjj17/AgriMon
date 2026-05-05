@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AgriMon | Farm List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --header-bg: #d5edc9; 
+            --main-bg: #7ba86d; 
+            --text-dark: #2c3e50; 
+            --list-item-bg: #eafaf1; /* 列表项的淡绿色背景 */
+        }
+        
+        body { font-family: 'Georgia', serif; background-color: var(--main-bg); margin: 0; }
+
+        /* 统一的 Header */
+        .header { background: var(--header-bg); padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.1); }
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { height: 40px; cursor: pointer; }
+        /* 或者直接针对 nav-links */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; /* 使用绝对定位强制居中 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; margin-right: 20px; }
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
+
+        /* 列表容器 */
+        .container { padding: 50px; max-width: 900px; margin: 0 auto; }
+        .page-title { color: white; font-size: 40px; margin-bottom: 30px; font-weight: bold; }
+
+        /* 农场列表项样式 (参照图片) */
+        .farm-list { display: flex; flex-direction: column; gap: 20px; }
+        
+        .farm-item {
+            background-color: var(--list-item-bg);
+            border-radius: 50px; /* 圆角矩形 */
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .farm-item:hover {
+            transform: translateX(10px);
+            background-color: #dff5e8;
+        }
+
+        /* 绿色的圆圈图标 */
+        .farm-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .farm-name {
+            flex: 1;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        /* 右侧箭头图标 */
+        .arrow-icon {
+            font-size: 24px;
+            color: #27ae60;
+        }
+
+                /* 文字容器：实现姓名和 ID 上下排列 */
+        .nav-user-text {
+            display: flex;
+            flex-direction: column; /* 纵向排列 */
+                    text-align: right;      /* 文字右对齐 */
+            margin-right: 12px;     /* 与头像保持一点距离 */
+            line-height: 1.2;       /* 让名字和ID靠得更近 */
+        }
+
+        #navName {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        #navID {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* 确保头像大小统一 */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html" style="color: #27ae60;">Farm List<i class="fas fa-chevron-up"></i></a>
+                <a href="farmer_monitor.html">Monitoring Page</a>
+                <a href="farmer_manage.html">Task List<i class="fas fa-chevron-down"></i></a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div style="text-align: right; line-height: 1.2;">
+                <strong id="navName">Username</strong><br>
+                <small id="navID" style="font-size: 11px; color: #666;">ID: FM-001</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar">
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">My Farms</h1>
+        
+        <div class="farm-list">
+            <div class="farm-item" onclick="goToDashboard('Farm 1')">
+                <div class="farm-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="farm-name">Farm 1</div>
+                <div class="arrow-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+
+            <div class="farm-item" onclick="goToDashboard('Farm 2')">
+                <div class="farm-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <div class="farm-name">Farm 2</div>
+                <div class="arrow-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function goToDashboard(farmName) {
+            // 存储当前选中的农场名到本地
+            localStorage.setItem('current_farm', farmName);
+            // 跳转到详情页
+            window.location.href = 'farmer_dashboard.html';
+        }
+
+        // 初始化个人信息
+        document.addEventListener('DOMContentLoaded', () => {
+            const storedName = localStorage.getItem('user_name') || "Username";
+            const storedID = localStorage.getItem('user_id') || "FM-001";
+            document.getElementById('navName').innerText = storedName;
+            document.getElementById('navID').innerText = "ID: " + storedID;
+        });
+    </script>
+</body>
+</html>

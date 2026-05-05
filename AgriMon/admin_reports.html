@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report - AgriMon</title>
+    <style>
+        :root {
+            --bg-color: #76948a;      
+            --card-bg: #2d5450;       
+            --nav-bg: #cbdad5;        
+            --highlight-yellow: #ffd700;
+            --accent-green: #4ade80;
+            --terminal-white: #e0e0e0;
+            --text-dark: #2d5450;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- 加载弹窗 (保持百分比效果) --- */
+        #loading-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: #1a3330;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            transition: opacity 0.6s ease;
+        }
+
+        .loader-box { text-align: center; color: white; }
+        
+        .progress-bar-container {
+            width: 300px;
+            height: 20px;
+            border: 1px solid var(--highlight-yellow);
+            margin: 20px 0;
+            position: relative;
+            background: rgba(255,255,255,0.05);
+        }
+
+        #progress-fill {
+            height: 100%;
+            background: var(--highlight-yellow);
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+
+        #percent-text { font-size: 1.2rem; font-weight: bold; }
+
+        .hidden { opacity: 0; pointer-events: none; }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; /* 消除图片下方的微小间隙 */
+        }   
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-right { display: flex; align-items: center; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+
+        /* --- 内容区域排版 --- */
+        .content-wrapper {
+            padding: 60px 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .report-panel {
+            width: 100%;
+            max-width: 850px;
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            padding: 50px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+            color: #e0e0e0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            line-height: 2;
+        }
+
+        .report-title { color: var(--highlight-yellow); font-size: 1.5rem; margin-bottom: 30px; }
+        .section-header { color: var(--accent-green); margin: 30px 0 10px; }
+        .data-line { display: flex; justify-content: flex-start; }
+        .label { width: 250px; }
+
+        /* --- 加载弹窗逻辑 --- */
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #1a3330; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; z-index: 10000;
+            transition: opacity 0.5s;
+        }
+        .loading-bar { width: 250px; height: 4px; background: rgba(255,255,255,0.1); margin-top: 15px; border-radius: 2px; overflow: hidden; }
+        #fill { width: 0%; height: 100%; background: var(--highlight-yellow); }
+        .hidden { opacity: 0; pointer-events: none; }
+
+        /* --- 报告面板排版 --- */
+        .content-wrapper { display: flex; justify-content: center; padding: 40px 20px; }
+        
+        .report-panel {
+            width: 100%; max-width: 850px;
+            background-color: var(--card-bg);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            color: var(--terminal-white);
+            line-height: 1.8;
+            border-left: 5px solid var(--highlight-yellow);
+        }
+
+        .report-header {
+            font-size: 1.4rem;
+            color: var(--highlight-yellow);
+            margin-bottom: 25px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            color: var(--accent-green);
+            margin: 25px 0 10px 0;
+            font-weight: bold;
+        }
+
+        .data-row { display: flex; gap: 10px; }
+        .data-label { width: 220px; opacity: 0.8; }
+        .data-value { color: white; }
+
+        .recommendation-item {
+            margin-left: 20px;
+            margin-bottom: 10px;
+            color: #ff9f43; /* 橙色提醒感 */
+        }
+
+        .footer-path {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px dashed rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+            opacity: 0.6;
+        }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--highlight-yellow) !important; /* 使用 !important 确保覆盖默认白色 */
+            /* 关键修改：取消半透明效果，让它看起来很鲜艳 */
+            opacity: 1 !important;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: inline-block;
+            font-family: sans-serif;
+            font-weight: bold; /* 可选：让文字加粗，更显眼 */
+            flex-shrink: 0;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background-color: #a0b3ad;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="loading-overlay">
+        <div class="loader-box">
+            <div id="percent-text">Generating Report: 0%</div>
+            <div class="progress-bar-container">
+                <div id="progress-fill"></div>
+            </div>
+            <div style="font-size: 0.8rem; opacity: 0.6; letter-spacing: 2px;">FETCHING JOHOR TELEMETRY...</div>
+        </div>
+    </div>
+
+    <nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_about.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+            </div>
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div style="width: 100%; max-width: 850px;">
+            <a href="javascript:history.back()" class="back-btn">← Back to Details</a>
+            
+            <main class="report-panel">
+                <div class="report-header">
+                    ANALYZING MONTHLY DATA FOR: JOHOR
+                </div>
+                <div style="opacity: 0.7;">Processing period: 1st April 2026 - 18th April 2026</div>
+
+                <div class="section-title">--- EXECUTIVE SUMMARY ---</div>
+                <div class="data-row">
+                    <span class="data-label">Avg. Temperature</span>
+                    <span class="data-value">: 27.65 °C</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Total Water Usage</span>
+                    <span class="data-value">: 1549 Liters</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">System Uptime</span>
+                    <span class="data-value">: 99.8%</span>
+                </div>
+                <div class="data-row">
+                    <span class="data-label">Most Active Sensor</span>
+                    <span class="data-value">: Soil_Node_075</span>
+                </div>
+
+                <div class="section-title">--- RECOMMENDATIONS ---</div>
+                <div class="recommendation-item">1. Soil moisture levels are stable; maintain current irrigation.</div>
+                <div class="recommendation-item">2. Warning: Sensor Node #09 battery is at 15%, replace soon.</div>
+
+                <div class="footer-path">
+                    ----------------------------------------<br>
+                    Report successfully generated and saved.<br>
+                    Path: ./SMART_FARM_JOHOR_APR2026.txt
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // 百分比加载逻辑
+        function startLoading() {
+            let percent = 0;
+            const fill = document.getElementById('progress-fill');
+            const text = document.getElementById('percent-text');
+            const overlay = document.getElementById('loading-overlay');
+            
+            const timer = setInterval(() => {
+                percent += Math.floor(Math.random() * 5) + 2; 
+                if (percent >= 100) {
+                    percent = 100;
+                    clearInterval(timer);
+                    setTimeout(() => {
+                        overlay.classList.add('hidden');
+                    }, 500);
+                }
+                fill.style.width = percent + '%';
+                text.innerText = `Generating Report: ${percent}%`;
+            }, 50);
+        }
+
+        window.onload = startLoading;
+    </script>
+</body>
+</html>

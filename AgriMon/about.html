@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About AgriMon - System Info</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+                /* --- 1. 全局与背景重置 (对应图 9 的大背景) --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --text-dark: #2c3e50;
+}
+
+/* --- 导航栏整体样式 (完全参照图一) --- */
+.admin-nav {
+    display: flex;
+    justify-content: space-between; /* 左右两端对齐 */
+    align-items: center; /* 垂直居中 */
+    background-color: #cbdad5; /* 图一的浅灰绿色背景 */
+    padding: 0 40px; /* 左右内边距，留出呼吸空间 */
+    height: 75px; /* 设定一个固定高度 */
+    width: 100%; /* 宽度撑满页面 */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 添加轻微阴影，增加层次感 */
+    position: sticky; /* 粘性定位，使其固定在顶部 (可选) */
+    top: 0;
+    z-index: 1000;
+}
+
+/* --- 左侧 Logo 和标题 --- */
+.nav-left {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* Logo 和文字之间的间距 */
+}
+
+.logo-box {
+    background-color: #ffd700; /* 黄色 Logo 方块 */
+    width: 30px;
+    height: 30px;
+    border-radius: 4px; /* 轻微圆角 */
+}
+
+.logo-text {
+    color: #2d5450; /* 深灰绿色文字 */
+    font-size: 1.6rem;
+    font-weight: 800; /* 加粗 */
+    font-family: sans-serif; /* 使用清晰的无衬线字体 */
+}
+
+/* --- 中间导航链接 --- */
+.nav-center {
+    display: flex;
+    gap: 30px; /* 链接之间的间距 */
+}
+
+.nav-center a {
+    text-decoration: none;
+    color: #2A5052;
+    font-weight: 600;
+    font-weight: bold;
+}
+
+.nav-link {
+    text-decoration: none !important; /* 强制去掉下划线 */
+    color: #2d5450 !important;        /* 强制使用深绿色，覆盖掉蓝色 */
+    font-size: 1rem;
+    font-weight: 600; /* 中等加粗 */
+    transition: color 0.3s; /* 添加过渡效果 */
+}
+
+.nav-link:hover {
+    color: #ffd700; /* 悬停时变为黄色 */
+}
+
+/* --- 右侧用户头像 --- */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* 全局设定 */
+.about-page {
+    /* 必须指向 farm_bg.png */
+    background: url("assets/images/farm_bg.png") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+
+/* 绿色玻璃容器 (对应图二中间那条绿色) */
+.glass-container {
+    background-color: rgba(121, 172, 105, 0.92); /* 核心绿：#79AC69 */
+    width: 90%;
+    max-width: 600px;
+    margin: 40px auto;
+    border-radius: 30px;
+    padding: 40px;
+    color: white;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+    text-align: center;
+}
+
+/* Logo 样式 */
+.logo-circle img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 4px solid white;
+    background: white;
+}
+
+.version-badge {
+    background: #e1f5fe;
+    color: #27ae60;
+    display: inline-block;
+    padding: 4px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.8em;
+    margin: 10px 0;
+}
+
+/* 灰色小卡片 (模仿图二的视觉块) */
+.features-grid {
+    display: flex;
+    gap: 15px;
+    margin: 25px 0;
+}
+
+.feature-card {
+    background: rgba(255, 255, 255, 0.15); /* 半透明灰 */
+    flex: 1;
+    padding: 20px;
+    border-radius: 15px;
+    transition: 0.3s;
+}
+
+.feature-card i { font-size: 2em; margin-bottom: 10px; color: #f1f8e9; }
+.feature-card h3 { font-size: 0.9em; margin-bottom: 5px; }
+.feature-card p { font-size: 0.75em; opacity: 0.9; line-height: 1.4; }
+
+/* 底部详细信息块 */
+.dev-info-box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 30px;
+}
+
+.dev-info-box h3 { font-size: 1em; margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px; }
+.dev-info-box ul { list-style: none; }
+.dev-info-box li { margin-bottom: 10px; font-size: 0.9em; display: flex; justify-content: space-between; }
+
+/* 按钮样式 */
+.btn-return {
+    background: white;
+    color: #2d5a27;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-return:hover { background: #f0f0f0; transform: scale(1.05); }
+
+/* 导航栏样式 (复用你的 dashboard) */
+.navbar {
+    background-color: #CFE5C4; /* 更接近图一 */
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 30px;
+}
+
+.nav-logo { height: 40px; border-radius: 5px; }
+.nav-avatar { width: 35px; height: 35px; border-radius: 50%; }
+
+        body { font-family: sans-serif; background: #7ba86d; margin: 0; }
+        .header { background: #d5edc9; padding: 15px 30px; display: flex; justify-content: space-between; }
+        .container { display: flex; padding: 50px; gap: 40px; justify-content: center; }
+        .grid { display: grid; grid-template-columns: repeat(3, 120px); gap: 10px; }
+        .plot { background: #8b5a2b; aspect-ratio: 1; border-radius: 10px; display: flex; justify-content: center; align-items: center; font-size: 40px; }
+        .panel { background: white; padding: 30px; border-radius: 20px; width: 300px; }
+
+/* 右侧整体容器：水平对齐头像和文字 */
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* 文字与头像的间距 */
+}
+
+/* 文字容器：实现姓名和 ID 上下排列 */
+.nav-user-text {
+    display: flex;
+    flex-direction: column; /* 关键：垂直排列 */
+    text-align: right;      /* 文字向右对齐，靠近头像 */
+    line-height: 1.2;       /* 紧凑行高 */
+}
+
+/* 右侧用户信息区域布局 */
+.header-right {
+    display: flex;
+    align-items: center; /* 确保文字和头像垂直居中对齐 */
+    gap: 12px;           /* 文字与头像之间的间距 */
+    cursor: pointer;
+}
+
+/* 名字和 ID 的文字容器 */
+.nav-user-info {
+    display: flex;
+    flex-direction: column; /* 关键：让文字上下排列 */
+    text-align: right;      /* 关键：文字向右对齐，靠近头像 */
+    justify-content: center;
+    font-size: 14px;
+}
+
+/* 姓名样式 */
+#navName {
+    font-size: 16px;       /* 适当调大名字 */
+    font-weight: bold;
+    color: #2c3e50;
+    line-height: 1.2;      /* 压缩行高，让 ID 离名字更近 */
+}
+
+/* ID 样式 */
+#navID {
+    font-size: 11px;       /* ID 字体调小 */
+    color: #7f8c8d;        /* 颜色调浅，更有层次感 */
+    line-height: 1.2;
+}
+
+/* 确保头像大小适中 */
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid white;
+    background-color: #a0b3ad; /* 灰绿色占位符颜色 */
+    object-fit: cover;
+}
+    </style>
+</head>
+<body class="about-page">
+
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="about.html" style="text-decoration: none;">
+            <img src="assets/images/logo_agrimon.jpeg" class="nav-logo">
+        </a>
+    </div>
+    <div class="nav-center">
+            <a href="farmer_farmlist.html">Farm List <i class="fas fa-chevron-down"></i></a>
+            <a href="farmer_manage.html">Task List <i class="fas fa-chevron-down"></i></a>
+    </div>
+    <div class="header-right" onclick="location.href='farmer_profile.html'">
+        <div class="nav-user-info">
+            <strong id="navName">Username</strong>
+            <small id="navID">ID: FM-001</small>
+        </div>
+        <img src="assets/images/user_image.jpg" class="user-avatar">
+    </div>
+</nav>
+
+    <main class="content-wrapper">
+        <div class="glass-container">
+            
+            <div class="about-header">
+                <div class="logo-circle">
+                    <img src="assets/images/logo_agrimon.jpeg" alt="AgriMon Logo">
+                </div>
+                <div class="version-badge">v1.0</div>
+                <h1>AgriMon</h1>
+                <p class="subtitle">Integrated Smart Farming & Telemetry System</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <i class="fas fa-microchip"></i>
+                    <h3>IoT Monitoring</h3>
+                    <p>Real-time Sensor Monitoring (Sunlight, Temp, Moisture)</p>
+                </div>
+                <div class="feature-card">
+                    <i class="fas fa-robot"></i>
+                    <h3>Smart Automation</h3>
+                    <p>AI-driven advice for optimal crop growth.</p>
+                </div>
+            </div>
+
+            <div class="dev-info-box">
+                <h3><i class="fas fa-code"></i> SYSTEM SPECIFICATIONS</h3>
+                <ul>
+                    <li><strong>Developed By:</strong> KwickCraft</li>
+                    <li><strong>Technology:</strong> Java Object-Oriented Programming</li>
+                    <li><strong>Database Sync:</strong> Stable (0.2ms)</li>
+                    <li><strong>Security:</strong> Encrypted</li>
+                </ul>
+            </div>
+
+            <div class="action-footer">
+                <button class="btn-return" onclick="location.href='farmer_dashboard.html'">
+                    <i class="fas fa-arrow-left"></i> Return to Dashboard
+                </button>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

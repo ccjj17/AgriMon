@@ -1,0 +1,41 @@
+{
+  "user": {
+    "name": "Alex Johnson",
+    "role": "Premium Member",
+    "avatar": "assets/images/avatar.png"
+  },
+  "projects": [
+    {
+      "id": 1,
+      "title": "E-commerce Redesign",
+      "category": "Web Design",
+      "status": "In Progress",
+      "statusClass": "badge-warning",
+      "progress": 75,
+      "dueDate": "2024-05-20"
+    },
+    {
+      "id": 2,
+      "title": "Mobile Banking App",
+      "category": "UI/UX Research",
+      "status": "Completed",
+      "statusClass": "badge-success",
+      "progress": 100,
+      "dueDate": "2024-04-15"
+    },
+    {
+      "id": 3,
+      "title": "Marketing Dashboard",
+      "category": "Development",
+      "status": "In Progress",
+      "statusClass": "badge-warning",
+      "progress": 40,
+      "dueDate": "2024-06-02"
+    }
+  ],
+  "stats": {
+    "totalProjects": 12,
+    "activeTasks": 48,
+    "hoursTracked": 120
+  }
+}

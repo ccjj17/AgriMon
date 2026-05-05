@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Region Details - AgriMon</title>
+    <style>
+        :root {
+            --bg-color: #76948a;      /* 背景大面积绿色 */
+            --card-bg: #2d5450;       /* 功能卡片深绿色 */
+            --nav-bg: #cbdad5;        /* 导航栏和右侧列表底色 */
+            --text-dark: #2d5450;
+            --text-white: #ffffff;
+            --highlight-yellow: #ffd700;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Georgia', serif; /* 还原衬线字体风格 */
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; /* 消除图片下方的微小间隙 */
+        }    
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-right { display: flex; align-items: center; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+        /* --- 页面主体布局 --- */
+        .dashboard-container {
+            display: flex;
+            height: calc(100vh - 75px);
+            width: 100%;
+        }
+
+        /* --- 修改功能网格布局 --- */
+        .features-section {
+            flex: 2.2;
+            display: grid;
+            /* 使用 minmax 确保卡片不会被内容无限撑开 */
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            gap: 30px; /* 缩小间距，给小屏幕留空间 */
+            padding: 40px; /* 适当减少内边距 */
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            transition: 0.3s;
+            position: relative;
+            /* 关键：防止内容溢出 */
+            overflow: hidden; 
+            min-width: 0; 
+            padding: 20px;
+            text-align: center;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background-color: #35635e;
+        }
+
+        /* 卡片内的图标样式 */
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- 关键：字体自适应 --- */
+        .feature-card h2 {
+            /* 使用 vw 单位或者更小的固定字号，防止文字太长把卡片挤歪 */
+            font-size: clamp(1.2rem, 2.5vw, 2.2rem); 
+            font-weight: normal;
+            margin-top: 15px;
+            white-space: nowrap; /* 强制不换行，配合下面的处理 */
+            overflow: hidden;
+            text-overflow: ellipsis; /* 如果实在太长，显示省略号 */
+            width: 90%;
+        }
+
+        /* 针对极小窗口的媒体查询 */
+        @media (max-width: 1000px) {
+            .features-section {
+                padding: 20px;
+                gap: 15px;
+            }
+            .feature-card {
+                border-radius: 30px;
+            }
+        }
+
+        /* 卡片右上角的小 info 图标 */
+        .info-btn {
+            position: absolute;
+            top: 35px;
+            right: 35px;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,0.6);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* 右侧列表区（继承上一页样式） */
+        .list-wrapper {
+            flex: 0.8;
+            background-color: var(--nav-bg);
+            overflow-y: auto;
+            margin: 0; /* 确保没外边距 */
+            padding: 0; /* 确保没内边距 */
+            border-left: 1px solid rgba(45, 84, 80, 0.15);
+        }
+
+        .region-row {
+        width: 100%;
+        padding: 28px 0;
+        text-decoration: none;
+        color: #2d5450;
+        font-size: 1.5rem;
+        text-align: center;
+        display: block;
+        border-bottom: 1px solid rgba(45, 84, 80, 0.1);
+        transition: all 0.3s ease;
+        }
+
+        /* --- 关键：变暗高亮效果 --- */
+        .region-row.active {
+            background-color: rgba(45, 84, 80, 0.25) !important; /* 强制变暗 */
+            font-weight: bold !important;
+        }
+
+        /* 模拟截图中的当前选中地区（例如 Johor）的高亮 */
+        .region-row.current {
+            background-color: rgba(45, 84, 80, 0.05);
+            font-weight: bold;
+        }
+
+        .region-row:hover {
+            background-color: rgba(45, 84, 80, 0.1);
+        }
+
+        .list-wrapper::-webkit-scrollbar { width: 0px; }
+
+    </style>
+</head>
+<body>
+
+<nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_about.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+            </div>
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <main class="features-section">
+            <a href="admin_alerts.html" class="feature-card">
+                <div class="info-btn">i</div>
+                <div class="feature-icon">
+                    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <h2>Alert List</h2>
+            </a>
+
+            <a href="admin_realtime.html" class="feature-card">
+                <div class="info-btn">i</div>
+                <div class="feature-icon">
+                    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </div>
+                <h2>Real-Time Data</h2>
+            </a>
+
+            <a href="admin_chart.html" class="feature-card">
+                <div class="info-btn">i</div>
+                <div class="feature-icon">
+                    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                </div>
+                <h2>Charts</h2>
+            </a>
+
+            <a href="admin_reports.html" class="feature-card">
+                <div class="info-btn">i</div>
+                <div class="feature-icon">
+                    <svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                </div>
+                <h2>Reports</h2>
+            </a>
+        </main>
+
+        <aside class="list-wrapper">
+            <a href="?reg=Johor" class="region-row" data-region="Johor">Johor</a>
+            <a href="?reg=Kedah" class="region-row" data-region="Kedah">Kedah</a>
+            <a href="?reg=Kelantan" class="region-row" data-region="Kelantan">Kelantan</a>
+            <a href="?reg=Melaka" class="region-row" data-region="Melaka">Melaka</a>
+            <a href="?reg=Negeri Sembilan" class="region-row" data-region="Negeri Sembilan">Negeri Sembilan</a>
+            <a href="?reg=Pahang" class="region-row" data-region="Pahang">Pahang</a>
+            <a href="?reg=Penang" class="region-row" data-region="Penang">Penang</a>
+            <a href="?reg=Perak" class="region-row" data-region="Perak">Perak</a>
+            <a href="?reg=Perlis" class="region-row" data-region="Perlis">Perlis</a>
+            <a href="?reg=Sabah" class="region-row" data-region="Sabah">Sabah</a>
+            <a href="?reg=Sarawak" class="region-row" data-region="Sarawak">Sarawak</a>
+            <a href="?reg=Selangor" class="region-row" data-region="Selangor">Selangor</a>
+            <a href="?reg=Terengganu" class="region-row" data-region="Terengganu">Terengganu</a>
+        </aside>
+    </div>
+
+    <script>
+        function updateHighlight() {
+            // 1. 获取 URL 中的 reg 参数
+            const params = new URLSearchParams(window.location.search);
+            const reg = params.get('reg');
+            
+            // 2. 找到所有的行
+            const rows = document.querySelectorAll('.region-row');
+            
+            rows.forEach(row => {
+                // 清除之前的 active
+                row.classList.remove('active');
+                
+                // 3. 匹配当前参数 (不区分大小写)
+                if (reg && row.getAttribute('data-region').toLowerCase() === reg.toLowerCase()) {
+                    row.classList.add('active');
+                    row.scrollIntoView({ block: 'center' }); // 滚动到可见位置
+                }
+            });
+
+            // 4. 默认处理：如果没有任何参数，让第一个变暗
+            if (!reg) {
+                rows[0].classList.add('active');
+            }
+        }
+
+        // 页面一加载就执行
+        window.onload = updateHighlight;
+    </script>
+</body>
+</html>

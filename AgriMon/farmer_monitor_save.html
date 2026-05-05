@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Save Changes</title>
+    <style>
+        body { background:#7ba86d; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .modal { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btns { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .confirm { background: #27ae60; color: white; }
+        .cancel { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <h2>Save Changes?</h2>
+        <p>Update all 9 plots with the new crop?</p>
+        <div class="btns">
+            <button class="btn cancel" onclick="done(false)">Don't Save</button>
+            <button class="btn confirm" onclick="done(true)">Save</button>
+        </div>
+
+    </div>
+
+    <script>
+function done(isSave) {
+    if (isSave) {
+        // 1. 从临时区读取 (对应 edit 页面存入的名字)
+        const name = sessionStorage.getItem('pending_crop_name');
+        const img = sessionStorage.getItem('pending_crop_img');
+
+        if (name && img) {
+            // 2. 存入永久区 (localStorage)，这才是 dashboard 和 monitor 能读到的地方
+            localStorage.setItem('selected_crop_name', name);
+            localStorage.setItem('selected_crop_img', img);
+            
+            // 为了保险，也更新你之前的 sharedFarmData 变量
+            localStorage.setItem('sharedFarmData', JSON.stringify({
+                farmName: name,
+                status: "Planting"
+            }));
+
+            alert("Saved: " + name);
+        } else {
+            alert("No data found to save!");
+        }
+    }
+    // 3. 无论存没存，点完按钮都回主页
+    window.location.href = 'farmer_dashboard.html';
+}
+    </script>
+</body>
+</html>

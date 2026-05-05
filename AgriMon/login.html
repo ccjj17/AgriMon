@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMon | WELCOME!</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* ==========================================
+           1. 全局样式 (基于图二配色)
+           ========================================== */
+        :root {
+            --bg-left: #d5edc9; /* 左侧淡绿色背景 */
+            --primary-green: #2ecc71;
+            --text-dark: #2c3e50;
+            --input-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        body {
+            /* 背景图占满全屏 */
+            background: url('assets/images/farm_bg.png') no-repeat center center fixed;
+            background-size: cover;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* ==========================================
+           2. 左侧登录区域 (图二视觉)
+           ========================================== */
+        .login-left {
+            background-color: #DCF6C7; /* 深色磨砂绿 */
+            backdrop-filter: blur(12px);
+            flex: 1;             /* 核心修改：让它占据剩余空间的比例 */
+            /* 3:4 比例计算: 如果宽度 450px, 高度应为 600px */
+            width: 450px; 
+            height: 100%; 
+            position: relative;
+            max-width: 50%;      /* 限制它最大只占屏幕的一半 (如果你想要 1/2 的话) */
+            padding: 60px 45px;
+            display: flex;
+            align-items: center;
+            flex-direction: column;
+            justify-content: center; /* 内容在卡片内部也垂直居中 */
+            box-shadow: 0 25px 60px rgba(0,0,0,0.1);
+            color: white;
+            text-align: center;
+        }
+
+        /* 顶部 Sign up 按钮 */
+        .btn-signup {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: white;
+            color: var(--text-dark);
+            border: 2px solid var(--text-dark);
+            padding: 8px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            box-shadow: 0 4px 0 var(--text-dark); /* 图二的厚度感 */
+            transition: 0.1s;
+        }
+        .btn-signup:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 var(--text-dark);
+        }
+
+        /* 圆形 Logo */
+        .logo-circle {
+            width: 150px;
+            height: 150px;
+            background-color: #c9e0ac;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 80px;
+            margin-bottom: 20px;
+        }
+        .logo-circle img {
+            width: 100%;
+            height: auto;
+            border-radius: 50%; /* 确保容器是圆形的 */
+            object-fit: cover;  /* 核心修改：cover 会裁切图片以铺满圆形容器 */
+            display: block;    /* 消除潜在的行内间隙 */
+        }
+
+        /* WELCOME 字样 (图二字体风格) */
+        .welcome-text {
+            font-size: 36px;
+            font-weight: bold;
+            color: var(--text-dark);
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+        }
+
+        /* 登录表单容器 */
+        .form-container {
+            width: 100%;
+            max-width: 320px;
+        }
+
+        /* 标签页导航 (Farmer / Admin) */
+        .tabs {
+            display: flex;
+            background-color: #a8cf92;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+        }
+        .tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            color: var(--text-dark);
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .tab.active {
+            background-color: var(--bg-left);
+        }
+
+        /* 输入框区域 */
+        .inputs-area {
+            background-color: var(--bg-left);
+            padding: 20px;
+            border-radius: 0 0 10px 10px;
+            border: 2px solid #a8cf92;
+            border-top: none;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--input-bg);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        /* 密码输入框本身的样式，确保它和图标有间距 */
+        .input-group input[type="password"] {
+            flex: 1; /* 占据剩余空间 */
+            padding-right: 40px; /* 为图标留出右侧空间 */
+            /* 其他原有样式，如 height, border 等 */
+        }
+
+        /* 密码眼睛图标 */
+        .toggle-password {
+            position: absolute;
+            right: 15px;
+            top: 22.5px;
+            transform: translateY(-50%);
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: 0.3s;
+            z-index: 10;
+        }
+
+        /* 下部辅助功能 (Remember Me / Forgot) */
+        .helper-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 10px;
+        }
+        .helper-text a {
+            color: #3498db;
+            text-decoration: none;
+        }
+
+        /* ==========================================
+           3. 右侧插画区域 (图二插画)
+           ========================================== */
+        .login-right {
+            flex: 1;
+            background-image: url('assets/images/farm_bg.png'); /* 指向你目录下的背景图 */
+            background-size: cover;
+            background-position: center;
+            position: relative;
+        }
+
+        /* Enter 按钮 (置于插画区，对应图二) */
+        .login-btn {
+            background-color: #ffffff;
+            color: #2d5450;
+            border: none;
+            padding: 16px;
+            border-radius: 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+    
+            /* 核心定位代码 */
+            position: absolute;
+            bottom: 150px;       /* 距离底部 50px，你可以按需调整 */
+            left: 75%;          /* 移到水平中心线 */
+            transform: translateX(-50%); /* 向左偏移自身宽度的50%，实现完美居中 */
+    
+            width: 160px;
+            height: 70px;
+            letter-spacing: 2px;
+            display: flex;      /* 确保文字在按钮内垂直居中 */
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); /* 增加一点阴影让它在背景上更明显 */
+        }
+
+        .login-btn:hover { background-color: white; transform: translateX(-50%) translateY(-2px); /* 悬停效果也要保持水平居中 */ }
+        
+        .btn-enter:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 0 var(--text-dark);
+        }
+
+        /* 假设右侧区域的父容器类名是 .right-section */
+        .right-section {
+            position: relative;
+            display: flex; /* 启用 Flex 布局 */
+            justify-content: center; /* **核心代码：子元素水平居中** */
+            align-items: flex-end; /* 子元素垂直对齐到底部（按你原图的位置） */
+            padding-bottom: 50px; /* 给底部留点间距，按需调整 */
+            width: 100%; /* 确保占据右侧剩余空间 */
+            /* 其他原有样式，如 background-image 等 */
+        }
+
+        /* Enter 按钮本身的样式（去掉可能导致不居中的 position: absolute 或 margin-left） */
+        .right-section button {
+            /* 如果之前写了 position: absolute; right: ...; 请删掉 */
+            padding: 10px 40px;
+            background-color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            /* 其他原有样式，如 color, font-weight 等 */
+        }
+
+        .overlay {
+            display: none; /* 确保默认是隐藏的 */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 9999;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="login-container" style="display: flex; width: 100%; height: 100vh; margin: 0; overflow: hidden;">
+        
+        <div class="login-left">
+            <a href="register.html" class="btn-signup">Sign up</a>
+
+            <div class="logo-circle">
+                <img src="assets/images/logo_agrimon.jpeg" alt="AgriMon Logo">
+            </div>
+
+            <div class="welcome-text">WELCOME!</div>
+
+            <div class="form-container">
+                <div class="tabs">
+                    <div class="tab active" id="tabFarmer" onclick="setRole('Farmer')">Farmer</div>
+                    <div class="tab" id="tabAdmin" onclick="setRole('Admin')">Admin</div>
+                </div>
+
+                <div class="inputs-area">
+                    <div class="input-group">
+                        <input type="text" id="username" placeholder="Enter username">
+                    </div>
+
+                    <div class="input-group">
+                        <input type="password" id="password" placeholder="••••••••">
+                        <i class="fas fa-eye toggle-password" onclick="togglePassword()"></i>
+                    </div>
+
+                    <div class="helper-text" style="display:flex; justify-content: space-between;">
+                        <label><input type="checkbox"> Remember me</label>
+                    </div>
+                    <div class="helper-text" style="margin-top:5px; display:flex; gap: 20px;">
+                        <a href="forgot_info.html?mode=user">Forgot username</a>
+                        <a href="forgot_info.html?mode=pass">Forgot password</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="login-btn" onclick="handleLogin()">ENTER</button>
+    </div>
+
+    <script>
+        // 初始化角色为 Farmer
+        let currentRole = 'Farmer';
+
+        // 切换 Farmer/Admin 标签页的视觉效果
+        function setRole(role) {
+            currentRole = role;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            if(role === 'Farmer') {
+                document.getElementById('tabFarmer').classList.add('active');
+            } else {
+                document.getElementById('tabAdmin').classList.add('active');
+            }
+            console.log("Current role set to:", currentRole);
+        }
+
+        // 密码可见性切换 (图二新增功能)
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const toggleIcon = document.querySelector('.toggle-password');
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        }
+
+        // ==========================================
+        // 核心登录验证逻辑 (与图一完全一致)
+        // ==========================================
+        function handleLogin() {
+        // 获取用户名和密码输入框
+        const userField = document.getElementById('username');
+        const passField = document.getElementById('password');
+
+        // 获取它们的值
+        const username = userField.value.trim();
+        const password = passField.value;
+
+        // --- 这里是你的弹窗逻辑 ---
+        if (username === "") {
+            alert("⚠️ Please enter your username!");
+            userField.focus(); // 自动把光标移回输入框
+            return; // 停止往下执行
+        }
+
+        if (password === "") {
+            alert("⚠️ Please enter your password!");
+            passField.focus();
+            return;
+        }
+
+        // 3. 直接根据当前选择的标签 (currentRole) 跳转
+        // 不管输入什么 ID，只要选了 Admin 就去 Admin 页，选了 Farmer 就去 Farmer 页
+        if (currentRole === 'Admin') {
+            window.location.href = "admin_dashboard.html";
+        } 
+        else {
+            // 根据你之前的代码逻辑，Farmer 跳转到 dashboard 或 farmlist
+            window.location.href = "farmer_farmlist.html"; 
+        }
+        }
+
+        // 在登录成功的地方执行
+        localStorage.setItem('real_user_name', 'Username');
+
+    </script>
+
+</body>
+</html>
