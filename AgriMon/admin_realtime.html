@@ -213,45 +213,53 @@
         </div>
     </nav>
 
-        <div class="content-wrapper">
-            <main class="realtime-container">
-                <div class="header-area">
-                    <div class="header-left">
-                        <h2><span class="status-dot"></span><span id="regionTitle">Johor</span> Real-Time Data</h2>
-                    </div>
-                    <a href="admin_regions_detail.html" id="backLink" class="back-btn">← Back to Details</a>
-                </div>
-
-                <div class="data-grid">
-                    <div class="data-item">
-                        <span class="data-label">Temperature</span>
-                        <div class="data-value">28.5<span class="data-unit">°C</span></div>
-                    </div>
-
-                    <div class="data-item">
-                        <span class="data-label">Soil Moisture</span>
-                        <div class="data-value">42<span class="data-unit">%</span></div>
-                    </div>
-
-                    <div class="data-item">
-                        <span class="data-label">PH Value</span>
-                        <div class="data-value">6.8<span class="data-unit">pH</span></div>
-                    </div>
-                </div>
-            </main>
+        <div class="sensor-telemetry-bar">
+            <span>Status: <span class="status-highlight">● CONNECTED</span></span>
+            <span class="divider">|</span>
+            <span>Sampling Rate: <span class="rate-highlight">1.4s</span></span>
         </div>
+
+        <div class="content-wrapper">
+        <main class="realtime-container">
+            <div class="header-area">
+                <div class="header-left">
+                    <h2><span class="status-dot"></span><span id="regionTitle">Kelantan</span> Real-Time Data</h2>
+                </div>
+                <a href="admin_regions_detail.html" id="backLink" class="back-btn">← Back to Details</a>
+            </div>
+
+            <div class="data-grid">
+                <div class="data-item">
+                    <span class="data-label">Temperature</span>
+                    <div class="data-value">29.2<span class="data-unit">°C</span></div>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Soil Moisture</span>
+                    <div class="data-value">49<span class="data-unit">%</span></div>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">PH Value</span>
+                    <div class="data-value">6.28<span class="data-unit">pH</span></div>
+                </div>
+
+                <div class="data-item">
+                    <span class="data-label">Light Exposure</span>
+                    <div class="data-value">15463<span class="data-unit">Lux</span></div>
+                </div>
+            </div>
+        </main>
     </div>
 
     <script>
         function initRealtime() {
             const params = new URLSearchParams(window.location.search);
-            const reg = params.get('reg') || 'Johor';
+            // 修改默认地区为 Kelantan
+            const reg = params.get('reg') || 'Kelantan';
 
-            // 动态修改标题和返回按钮
             document.getElementById('regionTitle').innerText = reg;
             document.getElementById('backLink').href = `admin_regions_detail.html?reg=${reg}`;
-
-            // 这里以后可以添加真实的 API 调用来更新 data-value
         }
 
         window.onload = initRealtime;
