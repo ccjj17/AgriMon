@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring & Data - AgriMon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #76948a;      
+            --nav-bg: #cbdad5;        
+            --map-inner-bg: #e0ece4;  
+            --text-dark: #2d5450;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); font-family: 'Segoe UI', 'Georgia', serif; overflow: hidden; }
+
+        /* 导航栏样式保持一致 */
+        .admin-nav {
+            display: flex; justify-content: space-between; align-items: center;
+            background-color: var(--nav-bg); padding: 0 30px; height: 75px;
+        }
+        .nav-logo-img { width: 35px; height: 35px; object-fit: contain; }
+        .nav-logo-text { color: #2d5450; font-size: 1.6rem; font-weight: 800; font-family: sans-serif; }
+        .nav-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link { 
+            text-decoration: none; 
+            color: var(--text-dark); 
+            font-weight: 600; 
+            font-size: 0.95rem;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+        .nav-right { display: flex; align-items: center; cursor: pointer; }
+        .nav-user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+
+        /* 主布局 */
+        .dashboard-container {
+            display: flex;
+            height: calc(100vh - 75px);
+            width: 100%;
+        }
+
+        /* 地图区分配 */
+        .map-wrapper {
+            flex: 4; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            padding: 10px; 
+        }
+
+        .map-frame {
+            width: 98%; 
+            height: 95%; 
+            background-color: var(--map-inner-bg);
+            border-radius: 50px;
+            display: flex; 
+            justify-content: center; 
+            align-items: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* 图片容器占满整个白色背景框 */
+        .map-image-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            padding: 0 40px; 
+            gap: 20px;
+        }
+
+        /* 强制图片放大 */
+        .map-part {
+            height: auto;
+            max-height: 85%; 
+            object-fit: contain;
+            filter: drop-shadow(5px 5px 15px rgba(0,0,0,0.15));
+        }
+
+        /* 东西马图片宽度占比 */
+        .west-map { width: 40%; } 
+        .east-map { width: 60%; }
+
+        /* 右侧列表区保持固定宽度 */
+        .list-wrapper {
+            width: 320px; 
+            background-color: var(--nav-bg);
+            overflow-y: auto;
+            border-left: 2px solid rgba(45, 84, 80, 0.2);
+        }
+
+        .region-row {
+            display: block; width: 100%; padding: 22px 0;
+            text-decoration: none; color: var(--text-dark);
+            font-size: 1.25rem; text-align: center;
+            border-bottom: 1px solid rgba(45, 84, 80, 0.1);
+            transition: all 0.2s;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 500;
+        }
+
+        .region-row:hover { 
+            background-color: rgba(45, 84, 80, 0.15); 
+            font-weight: bold; 
+            letter-spacing: 0.5px;
+        }
+        .list-wrapper::-webkit-scrollbar { width: 0; }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_dashboard.html'">
+            <img src="assets/images/logo_agrimon.jpeg" class="nav-logo-img">
+            <span class="nav-logo-text" style="margin-left:8px;">AgriMon</span>
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        <div class="map-wrapper">
+            <div class="map-frame">
+                <div class="map-image-container">
+                    <img src="assets/images/west.png" alt="West Malaysia" class="map-part west-map">
+                    <img src="assets/images/east.png" alt="East Malaysia" class="map-part east-map">
+                </div>
+            </div>
+        </div>
+
+        <div class="list-wrapper">
+            <a href="admin_regions_detail.html?reg=Johor" class="region-row" onclick="selectRegion('Johor')">Johor</a>
+            <a href="admin_regions_detail.html?reg=Kedah" class="region-row" onclick="selectRegion('Kedah')">Kedah</a>
+            <a href="admin_regions_detail.html?reg=Kelantan" class="region-row" onclick="selectRegion('Kelantan')">Kelantan</a>
+            <a href="admin_regions_detail.html?reg=Melaka" class="region-row" onclick="selectRegion('Melaka')">Melaka</a>
+            <a href="admin_regions_detail.html?reg=Negeri Sembilan" class="region-row" onclick="selectRegion('Negeri Sembilan')">Negeri Sembilan</a>
+            <a href="admin_regions_detail.html?reg=Pahang" class="region-row" onclick="selectRegion('Pahang')">Pahang</a>
+            <a href="admin_regions_select.html" class="region-row" onclick="selectRegion('Penang'); return false;" style="opacity: 0.5; cursor: not-allowed;" title="Maintenance">Penang (Offline)</a>
+            <a href="admin_regions_detail.html?reg=Perak" class="region-row" onclick="selectRegion('Perak')">Perak</a>
+            <a href="admin_regions_detail.html?reg=Perlis" class="region-row" onclick="selectRegion('Perlis')">Perlis</a>
+            <a href="admin_regions_detail.html?reg=Sabah" class="region-row" onclick="selectRegion('Sabah')">Sabah</a>
+            <a href="admin_regions_detail.html?reg=Sarawak" class="region-row" onclick="selectRegion('Sarawak')" style="color: #27ae60; font-weight: bold;">Sarawak <i class="fas fa-star" style="color:#ffd700; font-size:0.85rem;"></i></a>
+            <a href="admin_regions_detail.html?reg=Selangor" class="region-row" onclick="selectRegion('Selangor')">Selangor</a>
+            <a href="admin_regions_detail.html?reg=Terengganu" class="region-row" onclick="selectRegion('Terengganu')">Terengganu</a>
+        </div>
+    </div>
+
+    <script>
+        function selectRegion(regionName) {
+            console.log(`📡 [中央网关] 已捕获管理员空间地理聚焦动作: [${regionName}]`);
+            // 写入本地缓存，确保接下来的实时监测、月度报表和历史图表有据可循
+            localStorage.setItem('admin_focused_region_name', regionName);
+        }
+    </script>
+</body>
+</html>

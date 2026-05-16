@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoring & Data - AgriMon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #76948a;      /* 背景大面积绿色 */
+            --card-bg: #2d5450;       /* 功能卡片深绿色 */
+            --nav-bg: #cbdad5;        /* 导航栏和右侧列表底色 */
+            --text-dark: #2d5450;
+            --text-white: #ffffff;
+            --highlight-yellow: #ffd700;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background-color: var(--bg-color); font-family: 'Segoe UI', 'Georgia', serif; overflow: hidden; }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; 
+        }    
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-right { display: flex; align-items: center; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+        /* --- 页面主体布局 --- */
+        .dashboard-container {
+            display: flex;
+            height: calc(100vh - 75px);
+            width: 100%;
+        }
+
+        /* 左侧主视窗包裹器（容纳动态大标题 ＋ 四大卡片） */
+        .main-content-wrapper {
+            flex: 2.2;
+            display: flex;
+            flex-direction: column;
+            padding: 40px;
+        }
+
+        /* ✨ 动态增加：充满高阶质感的监控区域地理大标题 */
+        .dynamic-geo-header {
+            font-family: 'Georgia', serif;
+            font-size: 1.8rem;
+            color: var(--highlight-yellow);
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+            border-bottom: 1px solid rgba(255,255,255,0.15);
+            padding-bottom: 12px;
+            text-transform: uppercase;
+        }
+
+        /* --- 修改功能网格布局 --- */
+        .features-section {
+            flex: 1;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr)); 
+            grid-template-rows: repeat(2, minmax(0, 1fr));
+            gap: 30px; 
+            min-height: 0; /* 强制网格遵循父类容器限制 */
+        }
+
+        .feature-card {
+            background-color: var(--card-bg);
+            border-radius: 50px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden; 
+            min-width: 0; 
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            background-color: #35635e;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+            border-color: var(--highlight-yellow);
+        }
+
+        /* 卡片内的图标样式 */
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--highlight-yellow);
+        }
+
+        /* --- 关键：字体自适应 --- */
+        .feature-card h2 {
+            font-family: 'Georgia', serif;
+            font-size: clamp(1.2rem, 2.2vw, 2rem); 
+            font-weight: normal;
+            margin-top: 10px;
+            white-space: nowrap; 
+            overflow: hidden;
+            text-overflow: ellipsis; 
+            width: 90%;
+        }
+
+        /* 卡片右上角的小 info 图标 */
+        .info-btn {
+            position: absolute;
+            top: 35px;
+            right: 35px;
+            width: 24px;
+            height: 24px;
+            border: 2px solid rgba(255,255,255,0.4);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+        }
+        .feature-card:hover .info-btn { color: var(--highlight-yellow); border-color: var(--highlight-yellow); }
+
+        /* 右侧列表区 */
+        .list-wrapper {
+            flex: 0.8;
+            background-color: var(--nav-bg);
+            overflow-y: auto;
+            margin: 0; 
+            padding: 0; 
+            border-left: 1px solid rgba(45, 84, 80, 0.15);
+        }
+
+        .region-row {
+            width: 100%;
+            padding: 28px 0;
+            text-decoration: none;
+            color: #2d5450;
+            font-size: 1.35rem;
+            text-align: center;
+            display: block;
+            border-bottom: 1px solid rgba(45, 84, 80, 0.1);
+            transition: all 0.2s ease;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: 500;
+        }
+
+        /* --- 关键：变暗高亮效果 --- */
+        .region-row.active {
+            background-color: rgba(45, 84, 80, 0.25) !important; /* 强行高保真变暗高亮 */
+            font-weight: bold !important;
+            letter-spacing: 0.5px;
+        }
+
+        .region-row:hover {
+            background-color: rgba(45, 84, 80, 0.12);
+        }
+
+        .list-wrapper::-webkit-scrollbar { width: 0px; }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_dashboard.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+            <span class="nav-logo-text" style="color:#2d5450; margin-left:8px;">AgriMon</span>
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <div class="dashboard-container">
+        
+        <main class="main-content-wrapper">
+            <div class="dynamic-geo-header" id="geo舱位HeaderDisplay">
+                <i class="fas fa-map-marker-alt" style="color:#ff6b6b; margin-right:10px;"></i>
+                LOCATION: LOADING CLUSTER...
+            </div>
+
+            <div class="features-section">
+                <a href="admin_alerts.html" class="feature-card" id="card_alerts">
+                    <div class="info-btn">i</div>
+                    <div class="feature-icon">
+                        <svg width="55" height="55" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    </div>
+                    <h2>Alert List</h2>
+                </a>
+
+                <a href="admin_realtime.html" class="feature-card" id="card_realtime">
+                    <div class="info-btn">i</div>
+                    <div class="feature-icon">
+                        <svg width="55" height="55" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                    </div>
+                    <h2>Real-Time Data</h2>
+                </a>
+
+                <a href="admin_chart.html" class="feature-card" id="card_chart">
+                    <div class="info-btn">i</div>
+                    <div class="feature-icon">
+                        <svg width="55" height="55" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+                    </div>
+                    <h2>Charts</h2>
+                </a>
+
+                <a href="admin_reports.html" class="feature-card" id="card_reports">
+                    <div class="info-btn">i</div>
+                    <div class="feature-icon">
+                        <svg width="55" height="55" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                    </div>
+                    <h2>Reports</h2>
+                </a>
+            </div>
+        </main>
+
+        <aside class="list-wrapper">
+            <a href="?reg=Johor" class="region-row" data-region="Johor" onclick="saveRegionToStorage('Johor')">Johor</a>
+            <a href="?reg=Kedah" class="region-row" data-region="Kedah" onclick="saveRegionToStorage('Kedah')">Main Crop</a>
+            <a href="?reg=Kelantan" class="region-row" data-region="Kelantan" onclick="saveRegionToStorage('Kelantan')">Kelantan</a>
+            <a href="?reg=Melaka" class="region-row" data-region="Melaka" onclick="saveRegionToStorage('Melaka')">Melaka</a>
+            <a href="?reg=Negeri Sembilan" class="region-row" data-region="Negeri Sembilan" onclick="saveRegionToStorage('Negeri Sembilan')">Negeri Sembilan</a>
+            <a href="?reg=Pahang" class="region-row" data-region="Pahang" onclick="saveRegionToStorage('Pahang')">Pahang</a>
+            <a href="?reg=Penang" class="region-row" data-region="Penang" onclick="saveRegionToStorage('Penang')">Penang</a>
+            <a href="?reg=Perak" class="region-row" data-region="Perak" onclick="saveRegionToStorage('Perak')">Perak</a>
+            <a href="?reg=Perlis" class="region-row" data-region="Perlis" onclick="saveRegionToStorage('Perlis')">Perlis</a>
+            <a href="?reg=Sabah" class="region-row" data-region="Sabah" onclick="saveRegionToStorage('Sabah')">Sabah</a>
+            <a href="?reg=Sarawak" class="region-row" data-region="Sarawak" onclick="saveRegionToStorage('Sarawak')" style="color:#e67e22; font-weight:bold;">Sarawak ★</a>
+            <a href="?reg=Selangor" class="region-row" data-region="Selangor" onclick="saveRegionToStorage('Selangor')">Selangor</a>
+            <a href="?reg=Terengganu" class="region-row" data-region="Terengganu" onclick="saveRegionToStorage('Terengganu')">Terengganu</a>
+        </aside>
+    </div>
+
+    <script>
+        function updateHighlight() {
+            // 1. 获取 URL 中的 reg 参数
+            const params = new URLSearchParams(window.location.search);
+            let reg = params.get('reg');
+            
+            // 2. 💡【全栈防假死熔断】：如果URL没有参数，立刻向 localStorage 索要上一页点的记忆！
+            if (!reg) {
+                reg = localStorage.getItem('admin_focused_region_name');
+            }
+            
+            // 3. 💡【终极降级资产】：如果连缓存也空了，直接大方锁定大本营砂拉越！
+            if (!reg) {
+                reg = "Sarawak";
+            }
+
+            // 4. 将确立的区域大名实时同步回缓存和上方科技标题
+            localStorage.setItem('admin_focused_region_name', reg);
+            document.getElementById('geo舱位HeaderDisplay').innerHTML = `
+                <i class="fas fa-broadcast-tower" style="color:#ffd700; margin-right:12px;"></i>
+                CURRENT REGION NODE: <span style="color:#ffffff; font-weight:bold;">${reg.toUpperCase()} CLUSTER</span>
+            `;
+            
+            // 5. 遍历右侧列表，实施变暗高亮并滚到正中央
+            const rows = document.querySelectorAll('.region-row');
+            rows.forEach(row => {
+                row.classList.remove('active');
+                if (row.getAttribute('data-region').toLowerCase() === reg.toLowerCase()) {
+                    row.classList.add('active');
+                    row.scrollIntoView({ block: 'center', behavior: 'smooth' }); 
+                }
+            });
+
+            // 6. 🚀【核心黑科技】：动态剥离并重写4大卡片的 href，向下游管道高能输送省份参数！
+            document.getElementById('card_alerts').href = `admin_alerts.html?reg=${reg}`;
+            document.getElementById('card_realtime').href = `admin_realtime.html?reg=${reg}`;
+            document.getElementById('card_chart').href = `admin_chart.html?reg=${reg}`;
+            document.getElementById('card_reports').href = `admin_reports.html?reg=${reg}`;
+            
+            console.log(`🛰️ [中央大厅分流器] 下行网关已全线接通！下游数据管道锁定：[${reg}]`);
+        }
+
+        // 右侧侧边栏点击时的实时缓存备份
+        function saveRegionToStorage(regionName) {
+            localStorage.setItem('admin_focused_region_name', regionName);
+        }
+
+        // 页面一加载就执行路由分发
+        window.onload = updateHighlight;
+    </script>
+</body>
+</html>

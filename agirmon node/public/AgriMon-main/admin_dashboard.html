@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - AgriMon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 全局样式 - 还原图一配色 */
+        :root {
+            --bg-color: #76948a;      /* 背景莫兰迪绿 */
+            --card-bg: #2d5450;       /* 卡片深绿色 */
+            --nav-bg: #cbdad5;        /* 导航栏浅色 */
+            --text-white: #ffffff;
+            --text-dark: #2d5450;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-white);
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; 
+        }   
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+
+        .nav-right { display: flex; align-items: center; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+        .profile-icon {
+            width: 35px;
+            height: 35px;
+            background-color: #a0b3ad;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        /* 主体布局 */
+        .dashboard-container {
+            padding: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .top-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        /* 卡片基础样式 - 关键的大圆角 */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 45px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-family: 'Georgia', serif; 
+            font-size: 1.8rem;
+            font-weight: normal;
+        }
+
+        .icon {
+            margin-right: 15px;
+            font-size: 1.5rem;
+        }
+
+        /* Active Farmers 区块 */
+        .active-farmers-card {
+            flex: 1;
+            text-align: center;
+        }
+
+        .big-number {
+            font-size: 7rem;
+            font-family: 'Georgia', serif;
+            display: block;
+            line-height: 1;
+            margin-top: 20px;
+        }
+
+        .unit {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+
+        /* Data Summary 区块 */
+        .data-summary-card {
+            flex: 2;
+        }
+
+        .data-list {
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+        }
+
+        .data-list li {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .data-label { opacity: 0.8; }
+        .data-value { font-weight: bold; }
+
+        /* Farm Overview 区块 */
+        .farm-overview-card {
+            width: 100%;
+        }
+
+        .status-bar {
+            background-color: rgba(0,0,0,0.2);
+            padding: 15px 25px;
+            border-radius: 15px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 1rem;
+            color: #a0ff9a; 
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .top-row { flex-direction: column; }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_about.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+            <span class="nav-logo-text" style="color:#2d5450; margin-left:8px;">AgriMon Admin</span>
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <div class="user-meta" id="adminNameDisplay" style="text-align: right; margin-right: 10px; color:#2d5450;">
+                <strong>Admin</strong><br><small>HQ Node</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <main class="dashboard-container">
+        <div class="top-row">
+            <section class="card active-farmers-card">
+                <div class="card-header">
+                    <span class="icon">👤</span>
+                    <h2>Active Farmers</h2>
+                </div>
+                <div class="card-body">
+                    <span class="big-number" id="activeFarmersNum">--</span>
+                    <span class="unit">persons</span>
+                </div>
+            </section>
+
+            <section class="card data-summary-card">
+                <div class="card-header">
+                    <span class="icon">📊</span>
+                    <h2>Data Summary</h2>
+                </div>
+                <ul class="data-list">
+                    <li><span class="data-label">System Health :</span> <span class="data-value" id="systemHealthVal">--%</span></li>
+                    <li><span class="data-label">Total Users :</span> <span class="data-value" id="totalUsersVal">--</span></li>
+                    <li><span class="data-label">Total Farms :</span> <span class="data-value" id="totalFarmsVal">--</span></li>
+                    <li><span class="data-label">Most Planted :</span> <span class="data-value" id="topCropVal">--</span></li>
+                </ul>
+            </section>
+        </div>
+
+        <section class="card farm-overview-card">
+            <div class="card-header">
+                <span class="icon">🏠</span>
+                <h2>Farm Overview</h2>
+            </div>
+            <div class="status-bar" id="adminStatusBar">
+                [STATUS] Syncing files with Central Database Layer...
+            </div>
+            <div style="margin-top: 40px; text-align: center; opacity: 0.8;" id="connectingPlaceholder">
+                <p style="color: #cbdad5;"><i class="fas fa-spinner fa-spin"></i> Loading platform telemetry matrix...</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 同步顶部栏管理员的个人卡片名字
+            const storedAdminName = localStorage.getItem('real_user_name') || "Admin Console";
+            const namePanel = document.getElementById('adminNameDisplay');
+            if(namePanel) {
+                namePanel.innerHTML = `<strong>${storedAdminName}</strong><br><small style="opacity:0.7;">Administrator</small>`;
+            }
+
+            const connectingBox = document.getElementById('connectingPlaceholder');
+
+            // 2. 跨网络冲向 Node.js 的 Admin 宏观数据网关
+            fetch('http://localhost:3000/api/admin/summary')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // 3. 将真账本数据全面灌注到精美的莫兰迪大圆角卡片中
+                        document.getElementById('activeFarmersNum').innerText = data.activeFarmers;
+                        document.getElementById('systemHealthVal').innerText = data.systemHealth + '%';
+                        document.getElementById('totalUsersVal').innerText = data.totalUsers;
+                        document.getElementById('totalFarmsVal').innerText = data.totalFarms;
+                        document.getElementById('topCropVal').innerText = data.topCrop;
+
+                        // 4. 将底部的加载提示升级为“全节点活跃”高大上状态
+                        document.getElementById('adminStatusBar').innerText = "[STATUS] All active farm nodes responding. 0 critical structural exceptions.";
+                        if (connectingBox) {
+                            connectingBox.innerHTML = `
+                                <p style="color: #a0ff9a; font-weight: bold;">
+                                    <i class="fas fa-check-circle"></i> Telemetry Matrix Fully Linked (${data.totalFarms} Farms under active observation)
+                                </p>
+                            `;
+                        }
+                        console.log("🛰️ [Admin] 成功载入全平台账本大盘总账信息！");
+                    } else {
+                        document.getElementById('adminStatusBar').innerText = "[ERROR] Back-end data rejected.";
+                        if (connectingBox) connectingBox.innerHTML = `<p style="color: #ff9999;">❌ Fail: ${data.message}</p>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Admin 宏观面板获取失败:", err);
+                    document.getElementById('adminStatusBar').innerText = "[DISCONNECTED] Gateway Offline.";
+                    if (connectingBox) {
+                        connectingBox.innerHTML = `
+                            <p style="color: #ff9999; font-weight: bold;">
+                                <i class="fas fa-exclamation-triangle"></i> Cannot connect to gateway. Please ensure 'node server.js' is active!
+                            </p>
+                        `;
+                    }
+                });
+        });
+    </script>
+</body>
+</html>

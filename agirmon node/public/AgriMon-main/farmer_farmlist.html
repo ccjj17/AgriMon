@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AgriMon | Farm List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { 
+            --header-bg: #d5edc9; 
+            --main-bg: #7ba86d; 
+            --text-dark: #2c3e50; 
+            --list-item-bg: #eafaf1; /* 列表项的淡绿色背景 */
+        }
+        
+        body { font-family: 'Georgia', serif; background-color: var(--main-bg); margin: 0; }
+
+        /* 统一的 Header */
+        .header { background: var(--header-bg); padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.1); }
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { height: 40px; cursor: pointer; }
+        /* 或者直接针对 nav-links */
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; /* 使用绝对定位强制居中 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; margin-right: 20px; }
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
+
+        /* 列表容器 */
+        .container { padding: 50px; max-width: 900px; margin: 0 auto; }
+        .page-title { color: white; font-size: 40px; margin-bottom: 30px; font-weight: bold; }
+
+        /* 农场列表项样式 (参照图片) */
+        .farm-list { display: flex; flex-direction: column; gap: 20px; }
+        
+        .farm-item {
+            background-color: var(--list-item-bg);
+            border-radius: 50px; /* 圆角矩形 */
+            display: flex;
+            align-items: center;
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .farm-item:hover {
+            transform: translateX(10px);
+            background-color: #dff5e8;
+        }
+
+        /* 绿色的圆圈图标 */
+        .farm-icon {
+            width: 60px;
+            height: 60px;
+            background-color: #27ae60;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 20px;
+            color: white;
+            font-size: 24px;
+        }
+
+        .farm-name {
+            flex: 1;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        /* 右侧箭头图标 */
+        .arrow-icon {
+            font-size: 24px;
+            color: #27ae60;
+        }
+
+        /* 文字容器：实现姓名和 ID 上下排列 */
+        .nav-user-text {
+            display: flex;
+            flex-direction: column; /* 纵向排列 */
+            text-align: right;      /* 文字右对齐 */
+            margin-right: 12px;     /* 与头像保持一点距离 */
+            line-height: 1.2;       /* 让名字和ID靠得更近 */
+        }
+
+        #navName {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        #navID {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* 确保头像大小统一 */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html" style="color: #27ae60;">Farm List<i class="fas fa-chevron-up"></i></a>
+                <a href="farmer_monitor.html">Monitoring Page</a>
+                <a href="farmer_manage.html">Task List<i class="fas fa-chevron-down"></i></a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div style="text-align: right; line-height: 1.2;">
+                <strong id="navName">Username</strong><br>
+                <small id="navID">ID: FETCHING...</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar">
+        </div>
+    </header>
+
+    <div class="container">
+        <h1 class="page-title">My Farms</h1>
+        
+        <div class="farm-list">
+            <p style="color: white; text-align: center;">⚡ Loading your farms from Java backend...</p>
+        </div>
+    </div>
+
+    <script>
+        // 点击任何一个农场卡片时的跳转逻辑
+        function goToDashboard(farmId, farmName) {
+            // 把当前选中的农场 ID 和名字存下来，方便下一个页面（九宫格监控页）使用
+            localStorage.setItem('current_farm_id', farmId);
+            localStorage.setItem('current_farm_name', farmName);
+            // 跳转到你的详情页
+            window.location.href = 'farmer_dashboard.html';
+        }
+
+        // 核心：页面一加载，立刻跑去 Node.js 抓取 Java 数据库里的真农场
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. 获取在 login.html 登录成功时记录的真用户名
+            const storedName = localStorage.getItem('real_user_name') || "wfevj";
+            document.getElementById('navName').innerText = storedName;
+
+            const farmListContainer = document.querySelector('.farm-list');
+
+            // 2. 向中端网关发送联络，索要该农民的农场列表
+            fetch(`http://localhost:3000/api/farmer/farms?username=${storedName}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // 清空网页原本写死的两个假 Farm 卡片
+                        farmListContainer.innerHTML = '';
+
+                        if (data.farms.length === 0) {
+                            farmListContainer.innerHTML = `<p style="color: white; text-align: center; font-size: 18px;">🚫 No farms bound to this account.</p>`;
+                            return;
+                        }
+
+                        // 3. 循环遍历 Java 数据，用你原汁原味的漂亮 CSS 结构画出卡片
+                        data.farms.forEach(farm => {
+                            // 顺便把右上角的 Farmer ID 换成真实的（例如 FAR-001）
+                            document.getElementById('navID').innerText = "ID: " + farm.ownerId;
+
+                            const item = document.createElement('div');
+                            item.className = 'farm-item';
+                            // 绑定点击事件，把真实的 ID 和名字传进去
+                            item.setAttribute('onclick', `goToDashboard('${farm.farmId}', '${farm.farmName}')`);
+                            
+                            item.innerHTML = `
+                                <div class="farm-icon">
+                                    <i class="fas fa-home"></i>
+                                </div>
+                                <div class="farm-name">${farm.farmName}</div>
+                                <div class="arrow-icon">
+                                    <i class="fas fa-chevron-right"></i>
+                                </div>
+                            `;
+                            // 塞进页面中
+                            farmListContainer.appendChild(item);
+                        });
+                    } else {
+                        alert("❌ 无法获取农场数据: " + data.message);
+                    }
+                })
+                .catch(err => {
+                    console.error("API 连接失败:", err);
+                    farmListContainer.innerHTML = `<p style="color: #ff9999; text-align: center;">⚠️ Unable to connect to server. Please check if node server.js is running.</p>`;
+                });
+        });
+    </script>
+</body>
+</html>

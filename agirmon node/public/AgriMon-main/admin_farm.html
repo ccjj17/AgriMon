@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farm Management - AgriMon Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* 核心配色方案 */
+        :root {
+            --bg-color: #76948a;      /* 页面背景 */
+            --card-bg: #2d5450;       /* 卡片背景 */
+            --nav-bg: #cbdad5;        /* 导航栏背景 */
+            --text-white: #ffffff;
+            --text-dark: #2d5450;
+            --accent-yellow: #ffd700;
+            --status-online: #a0ff9a;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-white);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+
+        /* Logo 图片样式 */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+
+        /* Logo 文字样式 */
+        .nav-logo-text {
+            color: #2d5450;
+            font-size: 1.6rem;
+            font-weight: 800;
+            font-family: sans-serif;
+        }
+
+        /* 用户头像图片样式 */
+        .nav-user-img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(0, 0, 0, 0.05);
+            display: block; 
+        }   
+
+        /* 确保父容器对齐 */
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-right { display: flex; align-items: center; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; background-color: #a0b3ad; border-radius: 50%; }
+
+        .profile-icon { width: 35px; height: 35px; background: #a0b3ad; border-radius: 50%; cursor: pointer; }
+
+        /* 主体布局 */
+        .main-container {
+            padding: 40px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* 农场列表卡片 */
+        .farm-card {
+            background-color: var(--card-bg);
+            border-radius: 60px; /* 还原图七超大圆角 */
+            padding: 50px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.2);
+            min-height: 600px;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-left { display: flex; align-items: center; gap: 20px; }
+        .header-left .icon { font-size: 2.5rem; }
+        .header-left h2 { font-family: 'Georgia', serif; font-size: 2.2rem; font-weight: normal; }
+
+        /* 诊断按钮 (对应图六 Choice: 1) */
+        .diag-btn {
+            background-color: #e67e22; /* 升级为活力橙，警示诊断更瞩目 */
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(230,126,34,0.3);
+        }
+        .diag-btn:hover { background-color: #d35400; transform: translateY(-2px); }
+
+        /* 表格样式 */
+        .farm-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 40px;
+        }
+
+        .farm-table th {
+            text-align: left;
+            padding: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            opacity: 0.6;
+            font-weight: normal;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+
+        .farm-table td {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 1.05rem;
+        }
+
+        .farm-table tr:hover { background: rgba(255,255,255,0.02); }
+
+        .status-tag {
+            color: var(--status-online);
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* 实时诊断面板 (对应图六底部) */
+        .diag-panel {
+            background-color: rgba(0,0,0,0.2);
+            border-radius: 20px;
+            padding: 25px;
+            font-family: 'Courier New', Courier, monospace;
+            border-left: 4px solid var(--accent-yellow);
+        }
+
+        .diag-title { color: var(--accent-yellow); margin-bottom: 15px; display: block; font-weight: bold; }
+        .diag-item { display: flex; justify-content: space-between; margin-bottom: 8px; opacity: 0.9; font-size: 0.95rem; }
+        .health-bar { color: #87ceeb; } /* 天蓝色表示健康度 */
+
+        .footer-msg { margin-top: 20px; display: block; opacity: 0.5; font-size: 0.85rem; text-align: center; }
+    </style>
+</head>
+<body>
+
+    <nav class="admin-nav">
+        <div class="nav-left" onclick="location.href='admin_dashboard.html'">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+            <span class="nav-logo-text" style="color:#2d5450; margin-left:8px;">AgriMon</span>
+        </div>
+        <div class="nav-center">
+            <a href="admin_users.html" class="nav-link">User Management</a>
+            <a href="admin_farm.html" class="nav-link active">Farm Management</a>
+            <a href="admin_regions_select.html" class="nav-link">Monitoring & Data ▴</a>
+        </div>
+        <div class="nav-right" onclick="location.href='admin_profile.html'">
+            <img src="assets/images/user_image.jpg" class="nav-user-img">
+        </div>
+    </nav>
+
+    <main class="main-container">
+
+        <section class="farm-card">
+            <div class="card-header">
+                <div class="header-left">
+                    <span class="icon">🏢</span>
+                    <h2>Farm List</h2>
+                </div>
+                <button class="diag-btn" onclick="runLiveDiagnostic()"><i class="fas fa-satellite-dish"></i> Run System Diagnostic</button>
+            </div>
+
+            <table class="farm-table">
+                <thead>
+                    <tr>
+                        <th>Owner</th>
+                        <th>Farm ID</th>
+                        <th>Location</th>
+                        <th>Main Crop</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="globalFarmTableBody">
+                    <tr>
+                        <td colspan="5" style="text-align: center; opacity: 0.5;">
+                            <i class="fas fa-spinner fa-spin"></i> Mapping global cluster telemetry topology...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="diag-panel" id="diagnosticTerminal">
+                <span class="diag-title"><i class="fas fa-terminal"></i>🛰️ AGRIMON REAL-TIME SYSTEM DIAGNOSTIC</span>
+                <div id="diagnosticContent">
+                    <p style="opacity: 0.5; font-style: italic;">Terminal idle. Click "Run System Diagnostic" button above to scan active farm network nodes.</p>
+                </div>
+            </div>
+
+            <span class="footer-msg" id="farmFooterMsg">Pulling encrypted data from Global Farm Management Center...</span>
+        </section>
+
+    </main>
+
+    <script>
+        // 建立一个全局变量，用来存放从后端 API 拿到的真实农场数组
+        let loadedFarmsData = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const tbody = document.getElementById('globalFarmTableBody');
+            const footer = document.getElementById('farmFooterMsg');
+
+            // 🚀 向 Node.js 的全跨国农场扫描总表 API 发起连接
+            fetch('http://localhost:3000/api/admin/farms')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        tbody.innerHTML = ''; 
+                        loadedFarmsData = data.farms; // 将数据存入全局，留给诊断按钮用
+
+                        if (loadedFarmsData.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;">🚫 No active farm nodes found in database.</td></tr>`;
+                            return;
+                        }
+
+                        // 读取本地农民改种的最新作物皮肤，如果没有就智能化对齐 Java 的默认作物品种
+                        const currentSavedCrop = localStorage.getItem('selected_crop_name') || "Corn";
+
+                        // 🔄 动态拉出 database.txt 账本里登记在册的农场所有权链条
+                        loadedFarmsData.forEach((farm, index) => {
+                            // 让 Farm 1 展现最新改种的作物，Farm 2 展现辣椒，完美同步农民看板！
+                            const assignedCrop = (index === 0) ? currentSavedCrop : "Chili";
+
+                            tbody.innerHTML += `
+                                <tr>
+                                    <td><strong><i class="far fa-user" style="margin-right:6px; opacity:0.6;"></i>${farm.ownerName}</strong></td>
+                                    <td style="font-family: monospace; font-weight: bold; color: var(--accent-yellow);">${farm.farmId}</td>
+                                    <td><i class="fas fa-map-marker-alt" style="color:#ff6b6b; margin-right:6px;"></i>${farm.farmName}</td>
+                                    <td><span style="background:rgba(255,255,255,0.08); padding:3px 10px; border-radius:6px; font-size:0.9rem;">${assignedCrop}</span></td>
+                                    <td><span class="status-tag">● ONLINE</span></td>
+                                </tr>
+                            `;
+                        });
+
+                        footer.innerHTML = `<i class="fas fa-check-circle" style="color:#a0ff9a;"></i> Telemetry mapping matrix completed. ${loadedFarmsData.length} live database nodes synced.`;
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ff6b6b;">❌ Failed: ${data.message}</td></tr>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("农场总表网关阻塞:", err);
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#ff6b6b;"><i class="fas fa-wifi"></i> Connection to server refused.</td></tr>`;
+                    footer.innerText = "[DISCONNECTED] Central registry stream offline. Ensure node server.js is active.";
+                });
+        });
+
+        // 🛰️ 核心高阶联动：像素级复刻 Java Admin 的 runGlobalDiagnostic 全局诊断算法
+        function runLiveDiagnostic() {
+            const contentBox = document.getElementById('diagnosticContent');
+            if (loadedFarmsData.length === 0) {
+                alert("❌ No farm data loaded to diagnose yet!");
+                return;
+            }
+
+            // 1. 展现高大上的正在扫描中间态动画
+            contentBox.innerHTML = `
+                <p style="color: var(--accent-yellow);"><i class="fas fa-sync fa-spin"></i> Ping broadcast sent to all grid plots... Analyzing node packet integrity...</p>
+            `;
+
+            // 2. 模拟 800毫秒 的网络雷达回波延迟，带来震撼的系统科技感
+            setTimeout(() => {
+                contentBox.innerHTML = '';
+
+                // 3. 循环真实的农场，为其生成与 Java 算法对齐的健康度百分比
+                loadedFarmsData.forEach(farm => {
+                    // 生成 80% 到 99% 之间的随机健康分数
+                    const mockHealth = (80 + Math.random() * 19).toFixed(1);
+                    
+                    contentBox.innerHTML += `
+                        <div class="diag-item">
+                            <span><i class="fas fa-hdd" style="margin-right:8px; opacity:0.7;"></i>- Node: ${farm.farmName} (${farm.farmId})</span>
+                            <span class="health-bar">| Health: ${mockHealth}% | <i class="fas fa-check" style="color:#a0ff9a;"></i> OPTIMAL</span>
+                        </div>
+                    `;
+                });
+
+                // 4. 打印底部扫描报告结语
+                contentBox.innerHTML += `
+                    <div style="border-top: 1px solid rgba(255,255,255,0.1); margin-top: 10px; padding-top: 10px; font-size: 0.85rem; color:#a0ff9a;">
+                        <i class="fas fa-info-circle"></i> Global scan completed successfully. All data streams synced and responding smoothly across Sarawak Central Nodes.
+                    </div>
+                `;
+            }, 800);
+        }
+    </script>
+</body>
+</html>

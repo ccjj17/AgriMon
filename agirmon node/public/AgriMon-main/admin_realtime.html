@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh-en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Data - AgriMon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-color: #76948a;      
+            --card-bg: #2d5450;       
+            --nav-bg: #cbdad5;        
+            --text-dark: #2d5450;
+            --text-white: #ffffff;
+            --highlight-yellow: #ffd700;
+            --value-green: #4ade80;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            font-family: 'Segoe UI', 'Georgia', serif;
+            overflow-x: auto; 
+            overflow-y: auto; 
+            min-height: 100vh;
+        }
+
+        /* --- 页面整体容器：防止导航栏和卡片挤歪 --- */
+        .dashboard-container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh; 
+            min-width: 1000px; 
+            overflow-x: auto;
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+        .nav-right { display: flex; align-items: center; cursor: pointer; }
+        .nav-user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }   
+
+        /* 🎯【重磅修复】：牢牢把巨化的 Logo 锁死在 35px，不准它再到处乱跑！ */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* ⚙️ 硬件监测状态控制条样式 */
+        .sensor-telemetry-bar {
+            background-color: #1a3633;
+            color: #cbdad5;
+            padding: 10px 40px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .status-highlight { color: var(--value-green); font-weight: bold; animation: blink 1.5s infinite; }
+        .rate-highlight { color: var(--highlight-yellow); font-weight: bold; }
+        .divider { opacity: 0.3; }
+
+        /* --- 内容区域布局 --- */
+        .content-wrapper {
+            flex: 1;
+            width: 100%;
+            padding: 40px 80px 80px 80px;
+            display: flex;
+            justify-content: center;
+            overflow-y: auto;
+            align-items: flex-start;
+        }
+
+        .realtime-container {
+            width: 100%;
+            max-width: 1200px;
+            min-width: 800px;
+            background-color: var(--card-bg);
+            border-radius: 60px;
+            padding: 60px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+            height: min-content;
+        }
+
+        .header-area {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 50px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            padding-bottom: 20px;
+        }
+
+        .header-left h2 { font-family: 'Georgia', serif; font-size: 2.5rem; color: white; font-weight: normal; }
+
+        .back-btn {
+            text-decoration: none;
+            color: var(--highlight-yellow) !important; 
+            opacity: 1 !important;
+            font-size: 1rem;
+            display: inline-block;
+            font-family: 'Segoe UI', sans-serif;
+            font-weight: bold; 
+            transition: transform 0.2s;
+        }
+        .back-btn:hover { transform: translateX(-4px); }
+
+        /* --- 数据卡片网格 --- */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 35px;
+            margin-top: 20px;
+        }
+
+        .data-item {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 40px;
+            padding: 40px 30px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .data-item:hover { 
+            transform: translateY(-5px); 
+            background: rgba(255, 255, 255, 0.06); 
+            border-color: var(--highlight-yellow);
+        }
+
+        .data-label {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: block;
+            font-family: 'Georgia', serif;
+        }
+
+        .data-value {
+            color: var(--value-green);
+            font-size: 4rem;
+            font-weight: bold;
+            font-family: Arial, sans-serif;
+        }
+
+        .data-unit {
+            font-size: 1.5rem;
+            margin-left: 6px;
+            color: var(--text-white);
+            opacity: 0.8;
+            font-weight: normal;
+        }
+
+        /* 状态指示器呼吸动画 */
+        .status-dot {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background-color: var(--value-green);
+            border-radius: 50%;
+            margin-right: 15px;
+            box-shadow: 0 0 12px var(--value-green);
+        }
+
+        @keyframes blink {
+            0% { opacity: 0.4; }
+            50% { opacity: 1; }
+            100% { opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <nav class="admin-nav">
+            <div class="nav-left" onclick="location.href='admin_dashboard.html'">
+                <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+                <span class="nav-logo-text" style="color:#2d5450; margin-left:8px;">AgriMon</span>
+            </div>
+            <div class="nav-center">
+                <a href="admin_users.html" class="nav-link">User Management</a>
+                <a href="admin_farm.html" class="nav-link">Farm Management</a>
+                <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+            </div>
+            <div class="nav-right" onclick="location.href='admin_profile.html'">
+                <img src="assets/images/user_image.jpg" class="nav-user-img">
+            </div>
+        </nav>
+
+        <div class="sensor-telemetry-bar">
+            <span><i class="fas fa-satellite-dish"></i> Telemetry Mesh: <span class="status-highlight">● LIVE LINKED</span></span>
+            <span class="divider">|</span>
+            <span>Gateway Receiver Rate: <span class="rate-highlight">1.4s</span></span>
+            <span class="divider">|</span>
+            <span id="terminalLogger" style="color: #cbdad5; opacity: 0.7;"><i class="fas fa-spinner fa-spin"></i> Awaiting packet cluster broadcast...</span>
+        </div>
+
+        <div class="content-wrapper">
+            <main class="realtime-container">
+                <div class="header-area">
+                    <div class="header-left">
+                        <h2><span class="status-dot"></span><span id="regionTitle">Perlis</span> Cluster Live Telemetry</h2>
+                    </div>
+                    <a href="admin_regions_detail.html" id="backLink" class="back-btn"><i class="fas fa-chevron-left"></i> Back to Hub</a>
+                </div>
+
+                <div class="data-grid">
+                    <div class="data-item">
+                        <span class="data-label"><i class="fas fa-thermometer-half" style="color:#e74c3c; margin-right:8px;"></i>Air Temperature</span>
+                        <div class="data-value" id="tempVal">--<span class="data-unit">°C</span></div>
+                    </div>
+
+                    <div class="data-item">
+                        <span class="data-label"><i class="fas fa-water" style="color:#3498db; margin-right:8px;"></i>Soil Moisture</span>
+                        <div class="data-value" id="soilVal">--<span class="data-unit">%</span></div>
+                    </div>
+
+                    <div class="data-item">
+                        <span class="data-label"><i class="fas fa-flask" style="color:#9b59b6; margin-right:8px;"></i>Soil pH Level</span>
+                        <div class="data-value" id="phVal">--<span class="data-unit">pH</span></div>
+                    </div>
+
+                    <div class="data-item">
+                        <span class="data-label"><i class="fas fa-sun" style="color:#f1c40f; margin-right:8px;"></i>Light Exposure</span>
+                        <div class="data-value" id="lightVal">--<span class="data-unit">Lux</span></div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        let reg = params.get('reg');
+        if(!reg) reg = localStorage.getItem('admin_focused_region_name');
+        if(!reg) reg = 'Sarawak'; 
+
+        document.getElementById('regionTitle').innerText = reg;
+        document.getElementById('backLink').href = `admin_regions_detail.html?reg=${reg}`;
+
+        // 严格对齐 Java 仿真边界数据范围
+        let currentTemp = 27.0 + (Math.random() * 4); // 27-31°C
+        let currentSoil = 45 + Math.floor(Math.random() * 15); // 45-60%
+        let currentPh = 6.2 + (Math.random() * 0.8);   // 6.2-7.0 pH
+        let currentLight = 15000 + Math.floor(Math.random() * 2000); // 15000-17000 Lux
+
+        updateUI();
+
+        setInterval(() => {
+            currentTemp += (Math.random() * 0.4 - 0.2);
+            currentTemp = Math.max(26.0, Math.min(32.0, currentTemp)); 
+
+            currentSoil += Math.floor(Math.random() * 3) - 1; 
+            currentSoil = Math.max(40, Math.min(65, currentSoil));
+
+            currentPh += (Math.random() * 0.04 - 0.02);
+            currentPh = Math.max(5.8, Math.min(7.4, currentPh));
+
+            currentLight += Math.floor(Math.random() * 100) - 50;
+            currentLight = Math.max(14000, Math.min(18000, currentLight));
+
+            updateUI();
+
+            const timestamp = new Date().toLocaleTimeString();
+            document.getElementById('terminalLogger').innerHTML = `
+                <i class="fas fa-check" style="color:var(--value-green);"></i> [${timestamp}] Packet unpacked. Syncing ${reg} IoT node cell matrix successfully.
+            `;
+        }, 1400); 
+
+        function updateUI() {
+            document.getElementById('tempVal').innerHTML = `${currentTemp.toFixed(1)}<span class="data-unit">°C</span>`;
+            document.getElementById('soilVal').innerHTML = `${Math.floor(currentSoil)}<span class="data-unit">%</span>`;
+            document.getElementById('phVal').innerHTML = `${currentPh.toFixed(2)}<span class="data-unit">pH</span>`;
+            document.getElementById('lightVal').innerHTML = `${Math.floor(currentLight)}<span class="data-unit">Lux</span>`;
+        }
+    </script>
+</body>
+</html>

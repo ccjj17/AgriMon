@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMon | Join Us</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-left: #d5edc9;
+            --primary-dark: #2d5450;
+            --text-dark: #2c3e50;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --accent-color: #a8cf92;
+        }
+
+        /* 核心布局：锁定全屏且不溢出 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            width: 100%;
+            font-family: 'Segoe UI', sans-serif;
+            overflow: hidden;
+        }
+
+        /* 父容器：实现左右一半一半 */
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- 左侧面板 (50%) --- */
+        .reg-left {
+            flex: 1; /* 占据 50% */
+            background-color: var(--bg-left);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            min-width: 400px; /* 防止缩小到变形的保底宽度 */
+        }
+
+        .logo-circle {
+            width: 120px;
+            height: 120px;
+            background-color: #c9e0ac;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-circle img { width: 100%; height: 100%; object-fit: cover; }
+
+        .welcome-text {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        /* 表单卡片 */
+        .reg-card {
+            background-color: var(--accent-color);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 350px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border: 2px solid #95b882;
+        }
+
+        .input-group { margin-bottom: 15px; position: relative; }
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: var(--input-bg);
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .login-link { text-align: center; margin-top: 15px; font-size: 13px; }
+        .login-link a { color: var(--primary-dark); text-decoration: none; font-weight: bold; }
+
+        /* 整个链接的样式 */
+        .login-link a {
+            color: #555; /* 其他文字用较淡的颜色 */
+            text-decoration: none;
+            font-size: 13px;
+            transition: 0.3s;
+        }
+
+        /* 专门针对 "Login" 这个词的突出样式 */
+        .login-highlight {
+            color: #2d5450;       /* 使用你 UI 中的深绿色，或者用 #e67e22 这种橙色更显眼 */
+            font-weight: 900;     /* 特粗字体 */
+            text-decoration: underline; /* 加上下划线 */
+            margin-left: 5px;
+        }
+
+        .login-link a:hover .login-highlight {
+            color: #d3d3d3;       /* 鼠标悬停时变成黄色，增加交互感 */
+        }
+
+        /* --- 右侧面板 (50%) --- */
+        .reg-right {
+            flex: 1; /* 占据 50% */
+            background: url('assets/images/farm_bg.png') no-repeat center center;
+            background-size: cover;
+            display: flex;
+            align-items: flex-end; /* 按钮靠下 */
+            justify-content: center; /* 按钮水平居中 */
+            padding-bottom: 80px; /* 距离底部间距 */
+            position: relative;
+        }
+
+        /* SIGN UP 按钮 (固定在右侧面板的中间底部) */
+        .btn-submit {
+            background-color: #ffd700;
+            color: #2d5450;
+            border: none;
+            width: 180px;
+            height: 70px;
+            border-radius: 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            letter-spacing: 2px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: 0.3s;
+        }
+
+        .btn-submit:hover {
+            background-color: white;
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <!-- 左侧：表单区 -->
+        <div class="reg-left">
+            <div class="logo-circle">
+                <img src="assets/images/logo_agrimon.jpeg" alt="Logo">
+            </div>
+            <div class="welcome-text">CREATE ACCOUNT</div>
+            
+            <div class="reg-card">
+                <div class="input-group">
+                    <input type="text" id="regUser" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <input type="email" id="regEmail" placeholder="Email Address">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="regPass" placeholder="Password">
+                </div>
+                <div class="input-group">
+                    <input type="password" id="regConfirmPass" placeholder="Confirm Password">
+                </div>
+                
+                <div class="login-link">
+                    <a href="login.html">
+                        ← Already have an account? <span class="login-highlight">Login</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：图片和按钮区 -->
+        <div class="reg-right">
+            <button class="btn-submit" onclick="performSignup()">SIGN UP</button>
+        </div>
+    </div>
+
+    <script>
+        function performSignup() {
+            const user = document.getElementById('regUser').value.trim();
+            const pass = document.getElementById('regPass').value;
+            const confirm = document.getElementById('regConfirmPass').value;
+
+            if (!user || !pass) {
+                alert("⚠️ Please fill in the required fields!");
+                return;
+            }
+
+            if (pass !== confirm) {
+                alert("⚠️ Passwords do not match!");
+                return;
+            }
+
+            alert("✅ Account created! Redirecting to login...");
+            window.location.href = "login.html";
+        }
+    </script>
+</body>
+</html>

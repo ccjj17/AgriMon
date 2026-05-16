@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Profile - Agrimon</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* --- 1. 全局与背景重置 (对应图 9 的大背景) --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.profile-page {
+    /* 核心：背景使用 farm_bg.png，居中铺满，固定不随滚动条移动 */
+    background: url('../images/farm_bg.png') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+
+/* --- 2. 导航栏 (保持和 Dashboard 一致的浅绿色) --- */
+.navbar {
+    background-color: rgba(214, 234, 190, 0.95); /* #D6EABE */
+    padding: 10px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+.nav-logo { height: 40px; border-radius: 5px; }
+.nav-menu a { text-decoration: none; color: #2d5a27; margin: 0 15px; font-weight: bold; }
+.nav-avatar { width: 40px; height: 40px; border-radius: 50%; vertical-align: middle; margin-left: 10px; border: 2px solid white; }
+
+/* --- 3. 主体内容布局 --- */
+.content-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 60px 0;
+}
+
+/* --- 4. 绿色主容器 (图 9 的半透明绿) --- */
+.profile-main-container {
+    background-color: rgba(121, 172, 105, 0.9); /* #79AC69 带透明度 */
+    width: 90%;
+    max-width: 650px; /* 限制最大宽度，保持美观 */
+    border-radius: 25px; /* 圆角 */
+    padding: 40px;
+    color: white;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.3);
+    position: relative; /* 为编辑图标提供定位参考 */
+}
+
+/* 编辑图标定位 */
+.edit-icon {
+    position: absolute;
+    top: 25px;
+    right: 25px;
+    font-size: 1.2em;
+    color: rgba(255,255,255,0.7);
+    cursor: pointer;
+}
+
+/* --- 5. 头像与头部信息 (对应图 9 灰色顶部占位符) --- */
+.profile-header-area {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-bottom: 35px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid rgba(255,255,255,0.2); /* 淡淡的分隔线 */
+}
+
+/* 插入头像的关键 */
+.main-avatar-holder img {
+    width: 140px; /* 大小适中 */
+    height: 140px;
+    border-radius: 50%; /* 圆形 */
+    border: 6px solid rgba(255,255,255,0.4); /* 外层光圈 */
+    background: white; /* 头像加载前的白底 */
+    object-fit: cover; /* 保证图片不变形 */
+}
+
+.user-role {
+    font-size: 0.95em;
+    background: rgba(0,0,0,0.15); /* 淡淡的底色 */
+    display: inline-block;
+    padding: 3px 15px;
+    border-radius: 20px;
+    margin-top: 5px;
+    color: #eaf1e7;
+}
+
+/* --- 6. 资料卡片区 (对应图 9 灰色主体卡片) --- */
+.info-details-area {
+    background: rgba(255, 255, 255, 0.1); /* 图 9 灰色卡片的绿色半透明版本 */
+    border-radius: 20px;
+    padding: 30px;
+}
+
+.detail-row {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 25px;
+}
+.detail-item { flex: 1; }
+.full-width { flex: 100%; }
+
+/* 资料标签 (USER ID 等) */
+.detail-item label {
+    display: block;
+    font-size: 0.75em;
+    font-weight: bold;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+}
+
+/* 资料内容 */
+.detail-item span {
+    display: block;
+    font-size: 1.15em;
+    border-bottom: 1px solid rgba(255,255,255,0.25);
+    padding-bottom: 6px;
+    line-height: 1.3;
+}
+
+/* 统计条区 */
+.stats-bar-area {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 25px;
+    padding-top: 25px;
+    border-top: 1px dashed rgba(255,255,255,0.3); /* 虚线分隔 */
+    text-align: center;
+}
+.stat-box { flex: 1; }
+.stat-count { display: block; font-size: 1.6em; font-weight: bold; color: #ffffff; }
+.stat-title { font-size: 0.8em; color: rgba(255,255,255,0.8); }
+
+/* --- 7. 退出按钮区 (对应图 9 底部灰色按钮) --- */
+.profile-actions-area {
+    margin-top: 35px;
+    text-align: center;
+}
+
+/* 全局设定 */
+.profile-page {
+    /* 必须指向 farm_bg.png */
+    background: url("assets/images/farm_bg.png") no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+}
+
+.btn-logout {
+    padding: 12px 60px; /* 大小适中 */
+    background: transparent; /* 背景透明 */
+    color: white;
+    border: 2px solid white; /* 白边框 */
+    border-radius: 12px; /* 圆角 */
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+/* 鼠标悬停时的效果 */
+.btn-logout:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-2px);
+}
+
+/* 鼠标移到 Logo 上时的效果 */
+.nav-left a:hover .nav-logo {
+    transform: scale(1.05);
+    transition: 0.2s;
+    cursor: pointer;
+}
+    </style>
+</head>
+<body class="profile-page">
+
+    <nav class="navbar">
+        <div class="nav-left">
+            <a href="about.html" style="text-decoration: none; display: block; height: 40px;">
+                <img src="assets/images/logo_agrimon.jpeg" class="nav-logo">
+            </a>
+        </div>
+        <div class="nav-menu">
+            <a href="farmer_farmlist.html">Farm List <i class="fas fa-chevron-down"></i></a>
+            <a href="farmer_manage.html">Task List <i class="fas fa-chevron-down"></i></a>
+        </div>
+        <div class="nav-right">
+            <img src="assets/images/user_image.jpg" class="nav-avatar"> </div>
+    </nav>
+
+    <main class="content-wrapper">
+        <div class="profile-main-container">
+            
+            <div class="profile-header-area">
+                <div class="main-avatar-holder">
+                    <img src="assets/images/user_image.jpg" alt="Farmer Wong" id="profileAvatar">
+                </div>
+                <div class="header-text-block">
+                    <h1 id="userName">Username</h1>
+                    <p class="user-role">Professional Farmer</p>
+                </div>
+                <i class="fas fa-edit edit-icon" title="Edit Profile"></i> </div>
+
+            <div class="info-details-area">
+                <div class="detail-row">
+                    <div class="detail-item">
+                        <label>USER ID</label>
+                        <span id="userID">FM-001</span>
+                    </div>
+                    <div class="detail-item">
+                        <label>EMAIL ADDRESS</label>
+                        <span id="userEmail">user@gmail.com</span>
+                    </div>
+                </div>
+
+                <div class="detail-row">
+                    <div class="detail-item full-width">
+                        <label>BIO</label>
+                        <span id="userBio">Eco-farming enthusiast. Dedicated to smart agriculture and sustainable development.</span>
+                    </div>
+                </div>
+
+                <div class="stats-bar-area">
+                    <div class="stat-box">
+                        <span class="stat-count" id="countFarms">2</span>
+                        <span class="stat-title">Farms Managed</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-count" id="countPlots">18</span>
+                        <span class="stat-title">Total Plots</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-count" id="joinDate">April 2026</span>
+                        <span class="stat-title">Member Since</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-actions-area">
+                <button class="btn-logout" onclick="location.href='login.html'">Logout System</button>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // 如果有需要动态加载 localStorage 数据的逻辑，放在这里
+window.onload = function() {
+    // 改用 'real_user_name' 这个钥匙
+    const actualName = localStorage.getItem('real_user_name') || "Wong"; 
+    
+    document.getElementById('userName').innerText = actualName;
+    document.getElementById('nav-username').innerText = actualName;
+};
+    </script>
+</body>
+</html>

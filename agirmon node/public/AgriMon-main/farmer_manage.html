@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMon | Task List</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --header-bg: #d5edc9;
+            --main-bg: #7ba86d;
+            --panel-bg: #eafaf1;
+            --text-dark: #2c3e50;
+            --indicator-bg: #d5edc9;
+            --danger-bg: #ff9999;
+        }
+
+        body {
+            font-family: 'Georgia', serif; 
+            background-color: var(--main-bg);
+            margin: 0;
+            overflow-x: hidden;
+        }
+
+        /* --- 导航栏 --- */
+        .header {
+            background-color: var(--header-bg);
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+        }
+
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { width: 45px; height: 45px; cursor: pointer; }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; 
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; font-size: 18px; transition: 0.2s; }
+        .nav-links a:hover { opacity: 0.7; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 45px; height: 45px; background: #eee; border-radius: 50%; border: 2px solid white; object-fit: cover;}
+
+        /* --- 主体布局 --- */
+        .main-content {
+            display: flex;
+            flex: 1;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 60px 40px;
+            gap: 40px;
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        /* --- 左侧农场显示 --- */
+        .farm-section { flex: 0 0 auto; }
+        .farm-title {
+            color: white;
+            font-size: 42px;
+            margin: 0 0 20px 0;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .grid-3x3 {
+            display: grid;
+            grid-template-columns: repeat(3, 140px);
+            grid-template-rows: repeat(3, 140px);
+            gap: 15px;
+        }
+
+        .plot-cell {
+            background-color: #8b5a2b;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: pointer; 
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s;
+            border: 3px solid transparent;
+        }
+        
+        .plot-cell:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+        }
+        /* 选中状态雷达发光框 */
+        .plot-cell.active {
+            border-color: #ffd700;
+            background-color: #a06b35; 
+            transform: scale(1.04);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .plot-cell img { width: 70%; height: auto; pointer-events: none; }
+
+        /* 泥土格子底部的坐标编号 */
+        .plot-coord {
+            position: absolute;
+            bottom: 6px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.6);
+            font-family: monospace;
+            letter-spacing: 1px;
+            pointer-events: none;
+        }
+
+        /* --- 右侧任务面板 --- */
+        .right-panel {
+            flex: 0 0 450px; 
+            background-color: var(--panel-bg);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .task-header {
+            text-align: center;
+            border-bottom: 2px solid var(--text-dark);
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+        }
+        .task-header h2 { font-size: 28px; margin: 0; color: var(--text-dark); text-transform: uppercase; }
+
+        .task-list {
+            list-style: none;
+            padding: 0;
+            margin: 0 0 30px 0;
+        }
+
+        .task-item {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 15px;
+            color: #333;
+            padding-left: 20px;
+            position: relative;
+        }
+        .task-item::before {
+            content: "-";
+            position: absolute;
+            left: 0;
+        }
+        .task-item b { color: #2980b9; font-weight: bold; } 
+        .alert-text { color: #e74c3c; font-weight: bold; }
+
+        .back-link {
+            display: block;
+            margin-top: 40px;
+            color: var(--text-dark);
+            text-decoration: underline;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+        .back-link:hover { opacity: 0.6; }
+
+        .footer-note {
+            position: fixed;
+            bottom: 20px;
+            left: 40px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            font-size: 14px;
+        }
+        .soil-sample { width: 25px; height: 25px; background: #8b5a2b; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html">Farm List <i class="fas fa-chevron-down"></i></a>
+                <a href="farmer_monitor.html">Monitoring Page</a>
+                <a href="farmer_dashboard.html" style="color: #27ae60;">Task List <i class="fas fa-chevron-up"></i></a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div class="user-meta" style="text-align: right; margin-right: 10px;">
+                <strong id="navName">Username</strong><br>
+                <small id="navID" style="font-size: 10px;">ID: FM-001</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar">
+        </div>
+    </header>
+
+    <div class="main-content">
+        <div class="farm-section">
+            <h1 class="farm-title" id="farmDisplay">Farm 1</h1>
+            <div class="grid-3x3" id="plotGrid">
+                </div>
+        </div>
+    
+        <div class="right-panel">
+            <div class="task-header">
+                <h2>Daily Tasks</h2>
+            </div>
+            
+            <ul class="task-list" id="dailyTasksList">
+                <li class="task-item">Loading live telemetry...</li>
+            </ul>
+
+            <div class="task-header">
+                <h2>Weekly Tasks</h2>
+            </div>
+            <ul class="task-list">
+                <li class="task-item">System Maintenance: Calibrate sensors for <span class="farmNameLabel">Farm 1</span></li>
+                <li class="task-item">Fertilizer Application: Schedule for coming Sunday</li>
+            </ul>
+            
+            <div class="back-link" onclick="location.href='farmer_dashboard.html'">
+                Back to Farm Details
+            </div>
+        </div>
+    </div>
+
+    <div class="footer-note">
+        <div class="soil-sample"></div> = one acre of land
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 同步用户和农场基本名字
+            const storedName = localStorage.getItem('user_name') || "Username";
+            document.getElementById('navName').innerText = storedName;
+
+            const currentFarm = localStorage.getItem('current_farm') || "Farm 1";
+            document.getElementById('farmDisplay').innerText = currentFarm;
+            document.querySelectorAll('.farmNameLabel').forEach(el => el.innerText = currentFarm);
+
+            // 2. ⚡【彻底解绑：全动态监听前端缓存】
+            let savedImg = localStorage.getItem('selected_crop_img');
+            let savedName = localStorage.getItem('selected_crop_name');
+
+            // 兜底机制：如果没有正常传参，默认提供辣椒
+            if (!savedImg || savedImg.includes("flaticon")) {
+                savedImg = "assets/images/chili.png"; 
+                savedName = "Chili";
+            }
+
+            // 3. 生成 3x3 纯净测控数据 (没有红点，坐标安全)
+            const farmSeed = currentFarm.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+            const plotsData = [];
+            
+            for (let r = 0; r < 3; r++) {
+                for (let c = 0; c < 3; c++) {
+                    const currentMoisture = parseFloat((44.0 + ((r * 7 + c * 13 + farmSeed) % 22) * 1.1).toFixed(1));
+                    const applyWater = parseFloat(((70.0 - currentMoisture) * 0.5).toFixed(1));
+                    const pestRate = parseFloat((1.2 + ((r + c + farmSeed) % 4) * 0.8).toFixed(1));
+
+                    plotsData.push({ row: r, col: c, moisture: currentMoisture, water: applyWater, pestPercent: pestRate });
+                }
+            }
+
+            // 4. 渲染雷达网格
+            const grid = document.getElementById('plotGrid');
+            grid.innerHTML = ''; 
+
+            plotsData.forEach((plot, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'plot-cell';
+                
+                // 动态塞入：你上一页选了啥图片，这里就显示啥图片！包含坐标
+                cell.innerHTML = `
+                    <img src="${savedImg}" alt="${savedName}">
+                    <div class="plot-coord">${plot.row}${plot.col}</div>
+                `;
+
+                // 注册雷达点击事件
+                cell.addEventListener('click', function() {
+                    document.querySelectorAll('.plot-cell').forEach(el => el.classList.remove('active'));
+                    this.classList.add('active');
+                    renderDailyTasks(plot, savedName); // 动态传入你选的作物名字
+                });
+
+                grid.appendChild(cell);
+            });
+
+            // 5. 渲染任务流文本 (彻底修复错别字，同步动态作物名字)
+            function renderDailyTasks(plot, cropName) {
+                const dailyList = document.getElementById('dailyTasksList');
+                dailyList.innerHTML = `
+                    <li class="task-item">Water <span class="farmNameLabel">${currentFarm}</span>: Current <b>${plot.moisture}%</b>. Apply <b style="text-decoration: underline;">${plot.water}L</b> to reach 70.0%.</li>
+                    <li class="task-item">Pest Control: <span style="font-weight:bold; color:#2c3e50;">Nominal status (${plot.pestPercent}%)</span> at current Zone [${plot.row}, ${plot.col}].</li>
+                    <li class="task-item">General Inspection: Check growth status for all <b style="color:#2980b9;">${cropName}</b> plots.</li>
+                `;
+            }
+
+            // 6. 默认高亮第一格
+            if (grid.children[0]) {
+                grid.children[0].classList.add('active');
+                renderDailyTasks(plotsData[0], savedName);
+            }
+        });
+    </script>
+</body>
+</html>
+</html>

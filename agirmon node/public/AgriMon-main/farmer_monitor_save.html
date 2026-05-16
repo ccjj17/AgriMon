@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Save Changes</title>
+    <style>
+        body { background:#7ba86d; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .modal { background: white; padding: 40px; border-radius: 20px; text-align: center; width: 350px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .btns { display: flex; gap: 10px; margin-top: 30px; }
+        .btn { flex: 1; padding: 12px; border-radius: 8px; border: none; font-weight: bold; cursor: pointer; }
+        .confirm { background: #27ae60; color: white; }
+        .cancel { background: #eee; }
+    </style>
+</head>
+<body>
+    <div class="modal">
+        <h2>Save Changes?</h2>
+        <p>Update all 9 plots with the new crop?</p>
+        <div class="btns">
+            <button class="btn cancel" onclick="done(false)">Don't Save</button>
+            <button class="btn confirm" onclick="done(true)">Save</button>
+        </div>
+    </div>
+
+    <script>
+    function done(isSave) {
+        // 如果用户点了 Don't Save，直接跳回主页
+        if (!isSave) {
+            window.location.href = 'farmer_dashboard.html';
+            return;
+        }
+
+        const name = sessionStorage.getItem('pending_crop_name');
+        const img = sessionStorage.getItem('pending_crop_img');
+        const farmId = localStorage.getItem('current_farm_id') || "F-001-1";
+
+        if (name && img) {
+            localStorage.setItem('selected_crop_name', name);
+            localStorage.setItem('selected_crop_img', img);
+            
+            localStorage.setItem('sharedFarmData', JSON.stringify({
+                farmName: name,
+                status: "Planting"
+            }));
+
+            const confirmBtn = document.querySelector('.confirm');
+            if (confirmBtn) confirmBtn.disabled = true;
+
+            console.log(`📡 [前端] 正在向 Node.js 发射更新请求: 农场[${farmId}] -> 改种[${name}]`);
+
+            // 🚀 Fetch 异步请求将真数据打入后端
+            fetch('http://localhost:3000/api/farmer/farm/updateCrop', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    farmId: farmId,
+                    cropName: name
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    console.log("🎉 后端写入成功，正在物理清理本地缓存...");
+                    
+                    sessionStorage.removeItem('pending_crop_name');
+                    sessionStorage.removeItem('pending_crop_img');
+
+                    // 💡【无弹窗光速撤离】：不给 Live Server 任何反应时间，直接秒切页面！
+                    window.location.href = 'farmer_dashboard.html';
+                } else {
+                    alert("❌ Save failed: " + data.message);
+                    if (confirmBtn) confirmBtn.disabled = false;
+                }
+            })
+            .catch(err => {
+                console.error("连接 Node.js 后端失败:", err);
+                alert("⚠️ Cannot connect to server. Please check if node server.js is running.");
+                if (confirmBtn) confirmBtn.disabled = false;
+            });
+
+        } else {
+            alert("No data found to save!");
+            window.location.href = 'farmer_dashboard.html';
+        }
+    }
+    </script>
+</body>
+</html>

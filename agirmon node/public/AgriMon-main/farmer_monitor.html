@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitor Page</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --header-bg: #d5edc9; --main-bg: #7ba86d; --text-dark: #2c3e50; }
+        body { font-family: 'Georgia', serif; background-color: var(--main-bg); margin: 0; }
+
+        /* 导航栏保持一致 */
+        .header { background: var(--header-bg); padding: 10px 30px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid rgba(0,0,0,0.1); }
+        .header-left { display: flex; align-items: center; gap: 40px; }
+        .logo { width: 45px; cursor: pointer; }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            position: absolute; /* 使用绝对定位强制居中 */
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .nav-links a { text-decoration: none; color: var(--text-dark); font-weight: bold; margin-right: 20px; }
+        .header-right { display: flex; align-items: center; gap: 15px; cursor: pointer; }
+        .user-avatar { width: 40px; height: 40px; border-radius: 50%; border: 2px solid white; }
+
+        .container { display: flex; padding: 60px; gap: 60px; justify-content: center; align-items: center; }
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 180px); gap: 15px; }
+        .plot { background: #8b5a2b; aspect-ratio: 1; border-radius: 15px; display: flex; justify-content: center; align-items: center; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); transition: transform 0.2s; }
+        .plot:hover { transform: scale(1.03); }
+        .plot img { width: 70%; height: 70%; object-fit: contain; }
+
+        /* 只有加号在右侧 */
+        .add-btn { font-size: 80px; color: #3498db; cursor: pointer; transition: 0.3s; }
+        .add-btn:hover { transform: scale(1.1) rotate(90deg); color: #2980b9; }
+
+        /* 文字容器：实现姓名和 ID 上下排列 */
+        .nav-user-text {
+            display: flex;
+            flex-direction: column; /* 纵向排列 */
+            text-align: right;      /* 文字右对齐 */
+            margin-right: 12px;     /* 与头像保持一点距离 */
+            line-height: 1.2;       /* 让名字和ID靠得更近 */
+        }
+
+        #navName {
+            font-size: 15px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        #navID {
+            font-size: 11px;
+            color: #666;
+        }
+
+        /* 确保头像大小统一 */
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-left">
+            <img src="assets/images/logo_agrimon.jpeg" class="logo" onclick="location.href='about.html'">
+            <div class="nav-links">
+                <a href="farmer_farmlist.html">Farm List</a>
+                <a href="farmer_monitor.html" style="color: #27ae60;">Monitoring Page</a>
+                <a href="farmer_manage.html">Task List</a>
+            </div>
+        </div>
+        <div class="header-right" onclick="location.href='farmer_profile.html'">
+            <div class="nav-user-text">
+                <strong id="navName">Username</strong>
+                <small id="navID">ID: FETCHING...</small>
+            </div>
+            <img src="assets/images/user_image.jpg" class="user-avatar" alt="User">
+        </div>
+    </header>
+
+    <div class="container">
+        <div>
+            <h1 id="farmTitleElement" style="color:white; margin-bottom:20px;">Loading Farm...</h1>
+            <div class="grid-3x3" id="monitorGrid">
+                <p style="color: white; grid-column: 1/-1; text-align: center;">Connecting to Node.js网关...</p>
+            </div>
+        </div>
+        <i class="fas fa-plus-circle add-btn" onclick="location.href='farmer_monitor_edit.html'"></i>
+    </div>
+
+    <script {nonce}>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. 同步顶部栏身份
+            const storedName = localStorage.getItem('real_user_name') || "wfevj";
+            document.getElementById('navName').innerText = storedName;
+            
+            // 2. 抓取当前农场 ID 和名字
+            const currentFarmId = localStorage.getItem('current_farm_id') || "F-001-1";
+            const currentFarmName = localStorage.getItem('current_farm_name') || "Farm 1";
+            document.getElementById('farmTitleElement').innerText = currentFarmName;
+            document.getElementById('navID').innerText = "ID: " + currentFarmId.split('-').slice(0, 2).join('-');
+
+            const grid = document.getElementById('monitorGrid');
+
+            // ==================== ✨本地高清图标映射字典（完美修复版）✨ ====================
+            // 💡 这里的名字已经 100% 对齐了你前端按钮和后端的真英文名
+            const cropIconMap = {
+                'Corn': 'assets/images/corn.png',
+                'Paddy': 'assets/images/paddy.png',
+                'Chili': 'assets/images/chili.png',
+                'Banana': 'assets/images/banana.png',
+                'Cocoa': 'assets/images/coco.png',        // 🎯 修复：从 Coco 改为 Cocoa
+                'Oil Palm': 'assets/images/oilpalm.png',  // 🎯 修复：从 OilPalm 改为 Oil Palm
+                'Pineapple': 'assets/images/pineapple.png',
+                'Durian': 'assets/images/durian.png'
+            };
+            const defaultIcon = 'assets/images/corn.png'; 
+            // ===================================================================
+
+            // 3. 异步请求：直接去后端捞真账本
+            fetch(`http://localhost:3000/api/farmer/plots?farmId=${currentFarmId}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        grid.innerHTML = ''; 
+
+                        if (data.plots.length === 0) {
+                            grid.innerHTML = `<p style="color: white; grid-column: 1/-1; text-align: center;">🚫 No plots found in database for this farm.</p>`;
+                            return;
+                        }
+
+                        // 4. 循环组装监控地块
+                        data.plots.forEach(plot => {
+                            const dbCropName = plot.plotName || 'Corn';
+                            
+                            // 拿着真名字（例如 Cocoa）去对齐字典里的图片
+                            const finalImgPath = cropIconMap[dbCropName] || defaultIcon;
+
+                            grid.innerHTML += `
+                                <div class="plot" title="Plot ID: ${plot.plotId}">
+                                    <img src="${finalImgPath}" alt="${dbCropName}">
+                                </div>
+                            `;
+                        });
+                        console.log(`📡 [Monitor] 同步渲染成功！`);
+                    } else {
+                        grid.innerHTML = `<p style="color: #ff9999; grid-column: 1/-1; text-align: center;">❌ Error: ${data.message}</p>`;
+                    }
+                })
+                .catch(err => {
+                    console.error("Monitor 获取数据失败:", err);
+                    grid.innerHTML = `<p style="color: #ff9999; grid-column: 1/-1; text-align: center;">⚠️ 无法连接网关。请确保 node server.js 正在运行！</p>`;
+                });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Charts - AgriMon</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg-color: #76948a;      
+            --card-bg: #2d5450;       
+            --nav-bg: #cbdad5;        
+            --text-dark: #2d5450;
+            --text-white: #ffffff;
+            --highlight-yellow: #ffd700;
+            --accent-green: #4ade80;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            overflow-x: auto;
+            overflow-y: auto;
+        }
+
+        .dashboard-container {
+            display: flex; flex-direction: column;
+            width: 100%; min-width: 1000px;
+        }
+
+        /* --- 1:1 导航栏复刻 --- */
+        .admin-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--nav-bg);
+            padding: 0 30px;
+            height: 75px;
+            width: 100%;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-left { display: flex; align-items: center; gap: 12px; cursor: pointer; }
+        .logo-box { background-color: var(--highlight-yellow); width: 30px; height: 30px; border-radius: 4px; }
+        .logo-text { color: var(--text-dark); font-size: 1.6rem; font-weight: bold; letter-spacing: 1px; }
+
+        .nav-center { display: flex; gap: 40px; }
+        .nav-link {
+            text-decoration: none;
+            color: var(--text-dark);
+            font-family: 'Segoe UI', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+        .nav-link.active { border-bottom: 2px solid var(--text-dark); padding-bottom: 4px; }
+        .nav-right { display: flex; align-items: center; cursor: pointer; }
+        .nav-user-img { width: 45px; height: 45px; border-radius: 50%; object-fit: cover; }
+
+        /* 🎯【重磅修复】：焊死图表页的 Logo 防线，不准它再变成巨型怪物！ */
+        .nav-logo-img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* 外层包装盒：设为纵向排列 */
+        .content-wrapper {
+            padding: 40px 80px; 
+            display: flex;
+            flex-direction: column; 
+            align-items: center;    
+            width: 100%;
+        }
+
+        /* 按钮所在的这一横条 */
+        .top-action-bar {
+            width: 100%;
+            max-width: 1100px; 
+            margin-bottom: 15px; 
+            display: flex;
+            justify-content: flex-start; 
+        }
+
+        /* 按钮样式 */
+        .back-btn {
+            text-decoration: none;
+            color: var(--highlight-yellow) !important;
+            font-weight: bold;
+            font-size: 1rem;
+            opacity: 1 !important;
+            transition: 0.3s;
+        }
+        .back-btn:hover {
+            color: white !important;
+            transform: translateX(-4px);
+        }
+
+        /* 主大卡片 */
+        .chart-container {
+            width: 100%;
+            max-width: 1100px;
+            background-color: var(--card-bg);
+            border-radius: 40px;
+            padding: 40px 50px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+        }
+
+        .header-area {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 40px; border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 20px;
+        }
+        .header-left h2 { font-family: 'Georgia', serif; font-size: 2.4rem; color: white; font-weight: 600; }
+
+        .chart-section { margin-bottom: 50px; }
+        .chart-title {
+            color: white; font-size: 1.25rem; font-weight: 600; margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+            font-family: monospace;
+        }
+        .chart-title::before {
+            content: ""; display: inline-block; width: 4px; height: 18px; 
+            background: var(--highlight-yellow); border-radius: 2px;
+        }
+
+        .chart-box {
+            width: 100%; background: #244642; border-radius: 30px;
+            padding: 30px; border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        canvas { width: 100% !important; height: 350px !important; }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <nav class="admin-nav">
+            <div class="nav-left" onclick="location.href='admin_dashboard.html'">
+                <img src="assets/images/logo_agrimon.jpeg" alt="Logo" class="nav-logo-img">
+                <span class="nav-logo-text" style="color:#2d5450; margin-left:8px;">AgriMon</span>
+            </div>
+            <div class="nav-center">
+                <a href="admin_users.html" class="nav-link">User Management</a>
+                <a href="admin_farm.html" class="nav-link">Farm Management</a>
+                <a href="admin_regions_select.html" class="nav-link active">Monitoring & Data ▴</a>
+            </div>
+            <div class="nav-right" onclick="location.href='admin_profile.html'">
+                <img src="assets/images/user_image.jpg" class="nav-user-img">
+            </div>
+        </nav>
+
+        <div class="content-wrapper">
+            <div class="top-action-bar">
+                <a href="admin_regions_detail.html" id="backLink" class="back-btn"><i class="fas fa-chevron-left"></i> Back to Details</a>
+            </div>
+            <main class="chart-container">
+                <div class="header-area">
+                    <div class="header-left">
+                        <h2 id="regionTitle">Analysis Overview</h2>
+                    </div>
+                </div>
+
+                <div class="chart-section">
+                    <span class="chart-title"><i class="fas fa-chart-line" style="color:var(--highlight-yellow)"></i> 24H TEMP TREND (°C) - [CELL AUTOMATION]</span>
+                    <div class="chart-box">
+                        <canvas id="lineChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-section" style="margin-bottom: 0;">
+                    <span class="chart-title"><i class="fas fa-chart-bar" style="color:var(--accent-green)"></i> WEEKLY WATER CONGESTION USAGE (Liters)</span>
+                    <div class="chart-box">
+                        <canvas id="barChart"></canvas>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        let reg = params.get('reg');
+        if (!reg) reg = localStorage.getItem('admin_focused_region_name');
+        if (!reg) reg = 'Sarawak';
+
+        document.getElementById('regionTitle').innerText = reg + ' Analytics';
+        document.getElementById('backLink').href = `admin_regions_detail.html?reg=${reg}`;
+
+        const seed = reg.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+        
+        const dayLabels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00'];
+        const tempData = dayLabels.map((_, i) => {
+            const baseTemp = 27.2 + Math.sin(i + seed) * 1.8 + (seed % 3) * 0.4;
+            return parseFloat(Math.max(26.5, Math.min(31.8, baseTemp)).toFixed(1));
+        });
+
+        const weekLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        const waterData = weekLabels.map((_, i) => {
+            return 450 + Math.floor(Math.abs(Math.cos(i * seed) * 400)) + (seed % 5) * 20;
+        });
+
+        // 渲染折线图
+        new Chart(document.getElementById('lineChart'), {
+            type: 'line',
+            data: {
+                labels: dayLabels,
+                datasets: [{
+                    label: 'Plot Avg Temperature (°C)',
+                    data: tempData,
+                    borderColor: '#ffd700',
+                    backgroundColor: 'rgba(255, 215, 0, 0.12)',
+                    borderWidth: 4,
+                    tension: 0.4,
+                    fill: true,
+                    pointBackgroundColor: '#ffd700',
+                    pointRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { labels: { color: '#cbdad5', font: { size: 12, weight: 'bold' } } } },
+                scales: {
+                    y: { 
+                        grid: { color: 'rgba(255,255,255,0.05)' }, 
+                        ticks: { color: '#ffffff' },
+                        suggestedMin: 25,
+                        suggestedMax: 33
+                    },
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#ffffff' } }
+                }
+            }
+        });
+
+        // 渲染横向条形图
+        new Chart(document.getElementById('barChart'), {
+            type: 'bar',
+            data: {
+                labels: weekLabels,
+                datasets: [{
+                    label: 'Water Dispatched Volume (Liters)',
+                    data: waterData,
+                    backgroundColor: '#4ade80',
+                    hoverBackgroundColor: '#ffd700',
+                    borderRadius: 8,
+                    barThickness: 24
+                }]
+            },
+            options: {
+                indexAxis: 'y', 
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { 
+                    legend: { labels: { color: '#cbdad5', font: { size: 12, weight: 'bold' } } } 
+                },
+                scales: {
+                    x: { 
+                        beginAtZero: true,
+                        grid: { color: 'rgba(255,255,255,0.06)' },
+                        ticks: { color: '#ffffff' }
+                    },
+                    y: { 
+                        grid: { display: false },
+                        ticks: { color: '#ffffff', font: { weight: 'bold' } }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

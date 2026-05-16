@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriMon | Account Recovery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-left: #d5edc9;
+            --primary-dark: #2d5450;
+            --accent-yellow: #ffd700;
+            --input-bg: rgba(255, 255, 255, 0.7);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+        }
+
+        /* 左侧区域 - 继承自 Login 风格 */
+        .left-panel {
+            flex: 1;
+            background-color: var(--bg-left);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            box-shadow: 10px 0 30px rgba(0,0,0,0.1);
+            z-index: 2;
+        }
+
+        .logo-circle {
+            width: 120px;
+            height: 120px;
+            background-color: #c9e0ac;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .logo-circle img { width: 100%; object-fit: cover; }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--primary-dark);
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* 表单容器样式 */
+        .form-card {
+            width: 100%;
+            max-width: 320px;
+            background: rgba(255, 255, 255, 0.3);
+            padding: 25px;
+            border-radius: 15px;
+            border: 2px solid #a8cf92;
+        }
+
+        .input-group {
+            margin-bottom: 15px;
+            text-align: left;
+        }
+        .input-group label {
+            display: block;
+            font-size: 13px;
+            color: var(--primary-dark);
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: var(--input-bg);
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        /* 按钮样式 */
+        .action-btn {
+            width: 100%;
+            background-color: var(--primary-dark);
+            color: white;
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        .action-btn:hover { background-color: #1a3330; transform: translateY(-2px); }
+
+        .back-link {
+            margin-top: 20px;
+            color: #7f8c8d;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link:hover { color: var(--primary-dark); }
+
+        /* 右侧背景图 */
+        .right-panel {
+            flex: 1;
+            background: url('assets/images/farm_bg.png') no-repeat center center;
+            background-size: cover;
+        }
+
+        /* 隐藏/显示逻辑 */
+        .mode-panel { display: none; width: 100%; }
+        .mode-panel.active { display: block; }
+
+        #result-display {
+            margin-top: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            color: #2ecc71;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="left-panel">
+        <div class="logo-circle">
+            <img src="assets/images/logo_agrimon.jpeg" alt="Logo">
+        </div>
+
+        <h1 class="page-title" id="display-title">Recovery</h1>
+
+        <div class="form-card">
+            <div id="user-mode" class="mode-panel">
+                <div class="input-group">
+                    <label>Enter Registered Email</label>
+                    <input type="email" id="email-for-user" placeholder="example@mail.com">
+                </div>
+                <button class="action-btn" onclick="handleFindUser()">GET USERNAME</button>
+            </div>
+
+            <div id="pass-mode" class="mode-panel">
+                <div class="input-group">
+                    <label>Enter Registered Email</label>
+                    <input type="email" id="email-for-pass">
+                </div>
+                <div class="input-group">
+                    <label>New Password</label>
+                    <input type="password" id="new-pwd">
+                </div>
+                <div class="input-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="confirm-pwd">
+                </div>
+                <button class="action-btn" onclick="handleResetPass()">UPDATE PASSWORD</button>
+            </div>
+
+            <div id="result-display"></div>
+        </div>
+
+        <a href="login.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Login</a>
+    </div>
+
+    <div class="right-panel"></div>
+</div>
+
+<script>
+    // 页面加载时根据 URL 参数自动切换
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const mode = urlParams.get('mode');
+
+        if (mode === 'user') {
+            document.getElementById('user-mode').classList.add('active');
+            document.getElementById('display-title').innerText = "Find Username";
+        } else if (mode === 'pass') {
+            document.getElementById('pass-mode').classList.add('active');
+            document.getElementById('display-title').innerText = "Reset Password";
+        } else {
+            // 默认显示找回用户名
+            document.getElementById('user-mode').classList.add('active');
+        }
+    };
+
+    // 逻辑：找回用户名
+    function handleFindUser() {
+        const email = document.getElementById('email-for-user').value;
+        const resultDiv = document.getElementById('result-display');
+
+        if (!email.includes('@')) {
+            alert("Please enter a valid email");
+            return;
+        }
+
+        const username = email.split('@')[0]; // 模拟逻辑
+        resultDiv.style.display = "block";
+        resultDiv.style.color = "#27ae60";
+        resultDiv.innerText = "Your Username is: " + username;
+
+        setTimeout(() => {
+            alert("Username retrieved! Returning to login...");
+            window.location.href = "login.html";
+        }, 2500);
+    }
+
+    // 逻辑：重置密码
+    function handleResetPass() {
+        const email = document.getElementById('email-for-pass').value;
+        const p1 = document.getElementById('new-pwd').value;
+        const p2 = document.getElementById('confirm-pwd').value;
+        const resultDiv = document.getElementById('result-display');
+
+        if (!email || !p1 || !p2) {
+            alert("Please fill in all fields");
+            return;
+        }
+
+        if (p1 !== p2) {
+            alert("Passwords do not match!");
+            return;
+        }
+
+        resultDiv.style.display = "block";
+        resultDiv.style.color = "#27ae60";
+        resultDiv.innerText = "Password updated successfully!";
+
+        setTimeout(() => {
+            window.location.href = "login.html";
+        }, 2000);
+    }
+</script>
+
+</body>
+</html>

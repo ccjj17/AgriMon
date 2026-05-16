@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AgriMon | Select New Crop</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root { --main-bg: #7ba86d; --panel-bg: #eafaf1; }
+        body { font-family: 'Georgia', serif; background-color: var(--main-bg); margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        
+        .edit-box { display: flex; gap: 50px; align-items: center; background: rgba(255,255,255,0.2); padding: 40px; border-radius: 30px; }
+        
+        /* 3x3 空地 */
+        .grid-3x3 { display: grid; grid-template-columns: repeat(3, 130px); gap: 12px; }
+        .empty-plot { background: #8b5a2b; aspect-ratio: 1; border-radius: 12px; display: flex; justify-content: center; align-items: center; border: 2px dashed rgba(255,255,255,0.5); }
+        .empty-plot i { color: rgba(255,255,255,0.5); font-size: 30px; }
+
+        /* 作物选择面板 */
+        .selector-panel { width: 380px; background: var(--panel-bg); padding: 25px; border-radius: 20px; box-shadow: 10px 10px 0 rgba(0,0,0,0.1); }
+        .crop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; max-height: 400px; overflow-y: auto; padding-right: 5px; }
+
+        .crop-item { background: white; border: 2px solid transparent; border-radius: 12px; padding: 10px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: 0.2s; }
+        .crop-item:hover { background: #f0fdf4; }
+        .crop-item.active { border-color: #27ae60; background: #dff5e8; }
+        .crop-item span { font-size: 24px; }
+        .crop-item label { font-weight: bold; cursor: pointer; color: #2c3e50; }
+
+        .btn-confirm { background: #27ae60; color: white; border: none; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 18px; cursor: pointer; margin-top: 20px; }
+
+        /* 新增：控制作物图片的大小 */
+        .crop-item img {
+            width: 35px;           /* 设置宽度 */
+            height: 35px;          /* 设置高度 */
+            object-fit: contain;   /* 确保图片比例正常，不被拉伸 */
+            flex-shrink: 0;        /* 防止图片被文字挤压变形 */
+        }
+
+        .crop-item { 
+            background: white; 
+            border: 2px solid transparent; 
+            border-radius: 12px; 
+            padding: 10px; 
+            display: flex; 
+            align-items: center; 
+            gap: 12px;           /* 增加图片和文字的间距 */
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+
+        /* 这样你的图片就会乖乖听话了 */
+        .crop-item img {
+            width: 35px;
+            height: 35px;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="edit-box">
+        <div class="grid-3x3" id="previewGrid">
+            <script>
+                for(let i=0; i<9; i++) {
+                    // 保持你原本最纯粹的 9 格土地结构
+                    document.write('<div class="empty-plot"><img src="" style="width:100%; height:100%; object-fit:contain; display:none;"></div>');
+                }
+            </script>
+        </div>
+
+        <div class="selector-panel">
+            <h2 style="margin:0; color:#2c3e50;">Select New Crop</h2>
+            <div class="crop-grid">
+                <div class="crop-item" onclick="selectCrop('Corn', 'assets/images/corn.png', this)">
+                    <img src="assets/images/corn.png" alt="Corn">
+                    <label>Corn</label>
+                </div>
+
+                <div class="crop-item" onclick="selectCrop('Paddy', 'assets/images/paddy.png', this)">
+                    <img src="assets/images/paddy.png" alt="Paddy">
+                    <label>Paddy</label>
+                 </div>
+
+                <div class="crop-item" onclick="selectCrop('Chili', 'assets/images/chili.png', this)">
+                    <img src="assets/images/chili.png" alt="Chili">
+                    <label>Chili</label>
+                </div>
+
+                <div class="crop-item" onclick="selectCrop('Banana', 'assets/images/banana.png', this)">
+                    <img src="assets/images/banana.png" alt="Banana">
+                    <label>Banana</label>
+                </div>
+
+                <div class="crop-item" onclick="selectCrop('Cocoa', 'assets/images/coco.png', this)">
+                    <img src="assets/images/coco.png" alt="Cocoa">
+                    <label>Cocoa</label>
+                </div>
+
+                <div class="crop-item" onclick="selectCrop('Oil Palm', 'assets/images/oilpalm.png', this)">
+                    <img src="assets/images/oilpalm.png" alt="Oil Palm">
+                    <label>Oil Palm</label>
+                </div>
+
+                <div class="crop-item" onclick="selectCrop('Pineapple', 'assets/images/pineapple.png', this)">
+                    <img src="assets/images/pineapple.png" alt="Pineapple">
+                    <label>Pineapple</label>
+                </div>
+
+                <div class="crop-item" onclick="selectCrop('Durian', 'assets/images/durian.png', this)">
+                    <img src="assets/images/durian.png" alt="Durian">
+                    <label>Durian</label>
+                </div>
+            </div>
+            <button class="btn-confirm" onclick="goToSave()">Exit & Manage</button>
+        </div>
+    </div>
+
+    <script>
+        let selectedCropName = null;
+        let selectedCropImg = null;
+
+        // 修改 selectCrop 函数：完美接轨全栈接力棒
+        function selectCrop(cropName, cropImg, element) {
+            // 1. 高亮逻辑（保持不变）
+            document.querySelectorAll('.crop-item').forEach(item => item.style.border = "2px solid transparent");
+            element.style.border = "2px solid #27ae60";
+
+            // 2. 实时预览逻辑：更新左侧 9 个格子
+            const allImgs = document.querySelectorAll('#previewGrid img');
+            allImgs.forEach(img => {
+                img.src = cropImg;        // 换成点击的图片
+                img.style.display = "block"; // 让图片显示出来
+            });
+
+            // 3. 隐藏原本的加号图标（可选，为了美观）
+            const allIcons = document.querySelectorAll('#previewGrid i');
+            allIcons.forEach(icon => icon.style.display = "none");
+
+            // 4. 存入临时区（规范命名，确保能被后续页面顺畅抓取）
+            sessionStorage.setItem('pending_crop_name', cropName);
+            sessionStorage.setItem('pending_crop_img', cropImg);
+        }
+
+        // 修改 Exit & Manage 按钮调用的函数：顺畅导向你的确认弹窗页
+        function goToSave() {
+            const checkName = sessionStorage.getItem('pending_crop_name');
+            if(!checkName) return alert("Please select a crop!");
+            
+            location.href = 'farmer_monitor_save.html'; // 现在跳过去，save 页面就能拿到数据了
+        }
+
+        // 💯 完美保留：你原本留着备用的核心打分函数，一个都不少！
+        function saveChanges() {
+            // 1. 获取输入框里的新值
+            const updatedData = {
+                farmName: document.getElementById('farmNameInput') ? document.getElementById('farmNameInput').value : '',
+                status: document.getElementById('statusInput') ? document.getElementById('statusInput').value : '',
+            };
+
+            // 2. 存入 localStorage (转成字符串存储)
+            localStorage.setItem('sharedFarmData', JSON.stringify(updatedData));
+            alert("Changes saved successfully!");
+        
+            // 3. 跳转回 monitor 页面
+            window.location.href = "farmer_monitor.html";
+        }
+
+        // 💯 完美保留：原本的静态预览函数
+        function previewCrop(imgUrl) {
+            if (document.getElementById('previewImage')) {
+                document.getElementById('previewImage').src = imgUrl; 
+            }
+        }
+    </script>
+</body>
+</html>
